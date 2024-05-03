@@ -14,6 +14,8 @@ The game follows a series of steps for each episode:
 
 Steps 2-5 repeat three times per episode.
 
+The LLM responses can be iffy about sticking to the required format for the JS side of the game to properly function.  I haven't put retry logic in, but that's an option.
+
 ## Setup
 
 1. Clone the repository:
