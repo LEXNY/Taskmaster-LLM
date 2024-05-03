@@ -17,7 +17,7 @@ Copy and edit the template below (including the wrapping XML tags) in your respo
 
 challenge =`
 Generate an original challenge for a comedy game show with characters:
-{{ characters }}
+{{ character }}
 
 Use this template (including the wrapping XML tags) to structure your response:
 <challenge_template>{
@@ -49,7 +49,7 @@ Write a script for the following characters attempts at the challenge based on t
 
 {{ challenge }}
 
-{{ characters }}
+{{ character }}
 
 The script should:
 - Bring the characters stated strategies to life in an engaging, descriptive way
@@ -61,7 +61,9 @@ Use this template (including the wrapping XML tags) to structure your response:
 <scene_template>{
   "name": " scene name ",
   "text": " \
-    script \
+    [ line or action ] \
+    [ line or action ] \
+    [ ... ] \
   "
 }</scene_template>`
 
@@ -116,7 +118,7 @@ const data = {
 }
 
 const extract = (response) => {
-  const match = response.match(/<(\w+)>(.*)<\/\w+>/s)
+  const match = response.match(/<(\w+)_template>(.*)<\/\w+>/s)
   const entityType = match[1]
   const content = JSON.parse(match[2])
   return { entityType, content }
@@ -132,22 +134,21 @@ async function robo(text) {
     prompt: text,
     max_tokens: 1024,
   });
-console.log('-------------------------')
-console.log(response)
-  return response
+  return response.choices[0].text
 }
 
 async function send(template, recipient) {
   let prompt = template
+  const type = extract(template).entityType
   const schema = Object.keys(extract(template).content)
 
   for (const key in data) {
-    const regex = new RegExp(`{{\\s*{{key}}\\s*}}`, 'g')
-    prompt = prompt.replace(regex, data[key])
+    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
+    prompt = prompt.replace(regex, data[type][key])
   }
 
-  const { entityType, content } = extract(await recipient(prompt))
-  data[entityType] = content
+  const { content } = extract(await recipient(prompt))
+  data[type][content.name] = content
 
   if(recipient === robo) { console.log(content) }
 }
@@ -157,16 +158,34 @@ async function send(template, recipient) {
 //// EPISODE FORMAT ////
 
 
+// TODO: temp
+data.characters = {
+  character1: {
+    name: "Captain Quipster",
+    description: "A pun-loving pirate with a razor-sharp wit and a penchant for hijinks.",
+    strategy: "\"Since I'm a pirate, I'll try to plunder my way through this challenge with a barrage of pun-based comedy and some daring swashbuckling antics!\""
+  },
+  character2: {
+    name: "Professor Puzzleworth",
+    description: "A brilliant but absent-minded inventor with a tendency to overthink everything.",
+    strategy: "\"I shall apply my considerable intellect to analyze this challenge from every angle, concocting an intricate strategy that accounts for every possible variable and outcome. Surely, my finely-tuned logic will triumph!\""
+  },
+  character3: {
+    name: "Madame Mystique",
+    description: "A glamorous but cantankerous fortune teller with a knack for cutting insults.",
+    strategy: "\"I shall peer into the mystical realm and divine the path to victory, beguiling the audience with my mystical charm and biting sarcasm towards those foolish enough to cross me.\""
+  }
+}
+
 async function episode() {
-  await send(character, user)
+  // TODO: await send(character, user)
   
   for (let i = 0; i < 3; i++) {
     await send(challenge, robo)
-    await send(strategy,  user)
+    // TODO: await send(strategy,  user)
+    // TODO: ensure it attaches to the user.  Merge into the entity?  `data[type][name] = {...data[type][name], content}`?
     await send(scene,     robo)
     await send(critique,  robo)
   }
 }
 episode()
-
-console.log('=================')
