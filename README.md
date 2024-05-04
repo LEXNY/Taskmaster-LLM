@@ -21,40 +21,15 @@ Steps 2-5 repeat three times per episode.
 
 The LLM responses can be iffy about sticking to the required format for the JS side of the game to properly function.  I haven't put retry logic in, but that's an option.
 
-## Setup
+## Running
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/your-username/preposterous-gauntlet.git
-```
-
-2. Install dependencies:
-
-```bash
-cd preposterous-gauntlet
-npm install
-```
-
-3. Set up your OpenAI API key as an environment variable:
+Set up your OpenAI API key as an environment variable:
 
 ```bash
 export KEY=your_openai_api_key
-```
 
-4. Run the application:
-
-```bash
 node main.js
 ```
-
-## How to Contribute
-
-1. Fork the repository
-2. Create a new branch for your feature or bug fix
-3. Make your changes and commit them
-4. Push your changes to your forked repository
-5. Open a pull request
 
 ## License
 
