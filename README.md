@@ -2,6 +2,11 @@
 
 Preposterous Gauntlet is a comedic game show simulation project where characters compete in wacky challenges. It's a Node.js application that uses the OpenAI API to generate content for the game show.
 
+## Coming next!
+
+I will leverage this existing project to try to make an easy, free frontend version of this game.  https://github.com/abi/secret-llama
+
+
 ## How it Works
 
 The game follows a series of steps for each episode:
