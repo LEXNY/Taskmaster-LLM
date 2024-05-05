@@ -1,6 +1,3 @@
-// PREPOSTEROUS GAUNTLET
-
-
 //// TEMPLATES ////
 
 character =`
@@ -98,8 +95,16 @@ Use this template (including the wrapping XML tags) to structure your critique:
 
 
 
-//// DECLARE ////
+import { useState } from "react";
+import * as webllm from "@mlc-ai/web-llm";
 
+function App() {
+  const [loaded, setLoaded] = useState(false);
+  const [history, setHistory] = useState([])
+  const systemPrompt = "You analyze prompts with internal templates, then fill in and return the internal template.";
+
+
+  // TODO: useState
 const data = {
   character: {},
   challenge: {},
@@ -107,14 +112,22 @@ const data = {
   critique: {},
 }
 
-const extract = (response) => {
-  const match = response.match(/<(\w+)_template>(.*)<\/\w+>/s)
-  const entityType = match[1]
-  const content = JSON.parse(match[2])
-  return { entityType, content }
-}
+  let engine;
+  useEffect(() => {
+    engine = await webllm.CreateWebWorkerEngine(
+      new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),
+      selectedModel, // TODO
+      {
+        initProgressCallback: initProgressCallback,
+        appConfig: {...webllm.prebuiltAppConfig, useIndexedDBCache: true},
+      }
+    );
+    setLoaded(true);
+  })
 
-async function send(template, recipient) {
+// TODO: this is just the user's sending func
+  async function onSend() {
+    /* TODO
   let prompt = template
   const type = extract(template).entityType
   const schema = Object.keys(extract(template).content)
@@ -126,13 +139,72 @@ async function send(template, recipient) {
 
   const { content } = extract(await recipient(prompt))
   data[type][content.name] = content
+  */
+    setIsGenerating(true);
+
+    let loadedEngine = engine;
+    
+    loadedEngine = loadedEngine || await loadEngine();
+
+      // TODO: wrong place, because it's not always user->robo back and forth
+    try {
+      const completion = await loadedEngine.chat.completions.create({
+        stream: true, // TODO: false?
+        messages: [
+          { role: "system", content: systemPrompt },
+          userMessage,
+        ],
+        temperature: 0.5,
+        max_gen_len: 1024,
+      });
+
+      // Get each chunk from the stream
+      let assistantMessage = "";
+      for await (const chunk of completion) {
+        const curDelta = chunk.choices[0].delta.content;
+        if (curDelta) {
+          assistantMessage += curDelta;
+          // Update the last message
+          setChatHistory((history) => [
+            ...history.slice(0, -1),
+            { role: "assistant", content: assistantMessage },
+          ]);
+        }
+      }
+
+      setIsGenerating(false);
+
+      console.log(await loadedEngine.runtimeStatsText());
+    } catch (e) {
+      setIsGenerating(false);
+    }
+  }
+
+  return (
+    <div className="px-4 w-full">
+      <MessageList />
+      <UserInput onSend={onSend} />
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+const extract = (response) => {
+  const match = response.match(/<(\w+)_template>(.*)<\/\w+>/s)
+  const entityType = match[1]
+  const content = JSON.parse(match[2])
+  return { entityType, content }
 }
 
 
 
-//// EPISODE FORMAT ////
 
-async function episode() {
+//// EPISODE FORMAT ////
+/* TODO
   await send(character, user)
   
   for (let i = 0; i < 3; i++) {
@@ -142,4 +214,4 @@ async function episode() {
     await send(critique,  robo)
   }
 }
-episode()
+*/
