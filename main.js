@@ -95,70 +95,88 @@ Use this template (including the wrapping XML tags) to structure your critique:
 
 
 
-import { useState } from "react";
-// TODO: use OpenAI API.  `const storyteller = thing.chat.completions`
+import React, { useState } from 'react';
+import { Configuration, OpenAIApi } from 'openai';
 
-function App() {
+const App = () => {
   const systemPrompt = "You analyze prompts with internal templates, then fill in and return the internal template.";
 
-  const data = useState({
-    character: {},
-    challenge: {},
-    scene: {},
-    critique: {},
-  }
+  const configuration = new Configuration({
+    apiKey: 'YOUR_API_KEY',
+  });
+  const openai = new OpenAIApi(configuration);
 
-  async function send(template, data) {
-    const extract = (response) => {
-  const match = response.match(/<(\w+)_template>(.*)<\/\w+>/s)
-  const entityType = match[1]
-  const content = JSON.parse(match[2])
-  return { entityType, content }
-}
-    let prompt = template
-    const type = extract(template).entityType
-    const schema = Object.keys(extract(template).content)
+  const [state, setState] = useState({
+    stage: 'initial',
+    data: {
+      character: {},
+      challenge: {},
+      scene: {},
+      critique: {},
+    },
+  });
 
-    for (const key in data) {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
-      prompt = prompt.replace(regex, data[type][key])
+  const send = async (template, data) => {
+    let prompt = template;
+
+    for (const key in state.data) {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      prompt = prompt.replace(regex, JSON.stringify(state.data[key]));
     }
 
-    const completion = await storyteller.create({
-      messages: [
-        { role: "system", content: systemPrompt },
-        prompt,
-      ]
+    const completion = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: `${systemPrompt}\n\n${prompt}`,
+      max_tokens: 1024,
+      n: 1,
+      stop: null,
+      temperature: 0.7,
     });
 
-    const { content } = extract(completion)
-    data[type][content.name] = content
-  }
+    const response = completion.data.choices[0].text;
+    const match = response.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
+    const entityType = match[1];
+    const content = JSON.parse(match[2]);
 
+    setState((prevState) => ({
+      ...prevState,
+      stage: stageTransitions[prevState.stage][entityType] || prevState.stage,
+      data: {
+        ...prevState.data,
+        [entityType]: { ...prevState.data[entityType], ...content },
+      },
+    }));
+  };
+
+  const stageTransitions = {
+    initial: { character: CharacterStage },
+    character: { challenge: ChallengeStage },
+    challenge: { scene: SceneStage },
+    scene: { critique: CritiqueStage },
+    critique: { initial: InitialStage },
+  };
+
+  const CurrentStage = stageTransitions[state.stage][state.data[state.stage]] || InitialStage;
+
+  return <CurrentStage data={state.data[state.stage]} send={send} />;
+};
+
+const InitialStage = ({ send }) => {
+  return <button onClick={() => send(`<character_template>{}</character_template>`)}>Start</button>;
+};
+
+const CharacterStage = ({ data, send }) => {
   return (
     <div>
-      <Episode data={data} />
-      <TextBox send={send} />
+      <h2>Character Stage</h2>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+      <button onClick={() => send(`<challenge_template>{}</challenge_template>`)}>Next</button>
     </div>
   );
-}
+};
+
+const ChallengeStage = ({ data, send }) => <div>Challenge Stage</div>;
+const SceneStage = ({ data, send }) => <div>Scene Stage</div>;
+const CritiqueStage = ({ data, send }) => <div>Critique Stage</div>;
 
 export default App;
-
-
-// TODO: Episode component.
-// useEffect watches `data` for changes (watch deeply, so manual destructuring in component def is fine).
-// when changes happen within `data`, we can infer what stage of the episode we're in by what types have been modified (and where we're coming from).
-// so `Episode` will delegate the prompt selection and UI differences between episode stages.
-//// EPISODE FORMAT:  to be reworked into a React-based state machine flow as described above. ////
-/* TODO
-  await send(character, user)
-  
-  for (let i = 0; i < 3; i++) {
-    await send(challenge, robo)
-    await send(strategy,  user)
-    await send(scene,     robo)
-    await send(critique,  robo)
-  }
-}
-*/
