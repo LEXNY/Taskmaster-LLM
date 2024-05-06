@@ -97,15 +97,12 @@ Use this template (including the wrapping XML tags) to structure your critique:
 
 import React, { useState } from 'react';
 import { Configuration, OpenAIApi } from 'openai';
+const configuration = new Configuration({
+  apiKey: 'YOUR_API_KEY',
+});
+const openai = new OpenAIApi(configuration);
 
 const App = () => {
-  const systemPrompt = "You analyze prompts with internal templates, then fill in and return the internal template.";
-
-  const configuration = new Configuration({
-    apiKey: 'YOUR_API_KEY',
-  });
-  const openai = new OpenAIApi(configuration);
-
   const [state, setState] = useState({
     stage: 'initial',
     data: {
