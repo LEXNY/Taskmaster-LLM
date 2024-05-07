@@ -6,15 +6,16 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 // TODO: higher-order form component for the user to view prompt templates and fill in the response
-const PromptForm =({data, template, nextStage})=><>
+// TODO: will require extracting common parsing logic, so that the textarea input can be parsed.
+const PromptForm =({data, setData, template, nextStage, send})=><>
   <p>{prompt}</p>
-  <text>TODO</text>
+  <textarea>TODO</textarea>
   <button onClick={TODO}>
     TODO
   </button>
 </>
 
-const PromptCompletion =({data, template, nextStage})=>{
+const PromptCompletion =({data, setData, template, nextStage, send})=>{
   // TODO: `useEffect` and call `send` directly?
 }
 
@@ -45,6 +46,7 @@ const App = () => {
       temperature: 0.7,
     });
 
+    // TODO: extract common parsing logic /////
     const response = completion.data.choices[0].text;
     const match = response.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
     const type = match[1];
@@ -54,6 +56,7 @@ const App = () => {
       ...data,
       [type]: [...data[type], content],
     }));
+    //////////////
   };
 
   return <CurrentStage input={input} data={data} send={send} setStage={setStage} />;
