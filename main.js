@@ -1,6 +1,69 @@
-//// TEMPLATES ////
+import React, { useState } from 'react';
+import { Configuration, OpenAIApi } from 'openai';
+const configuration = new Configuration({
+  apiKey: 'YOUR_API_KEY',
+});
+const openai = new OpenAIApi(configuration);
 
-character =`
+// TODO: higher-order form component for the user to view prompt templates and fill in the response
+const PromptForm =({data, template, nextStage})=><>
+  <p>{prompt}</p>
+  <text>TODO</text>
+  <button onClick={TODO}>
+    TODO
+  </button>
+</>
+
+const PromptCompletion =({data, template, nextStage})=>{
+  // TODO: `useEffect` and call `send` directly?
+}
+
+const App = () => {
+  const [CurrentStage, setStage] = useState(CharacterStage);
+  const [input, setInput] = useState('');
+  const [data, setData] = useState({
+    character: [],
+    challenge: [],
+    scene:     [],
+    critique:  [],
+  });
+
+  const send = async (template, data) => {
+    let prompt = template;
+
+    for (const key in data) {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      prompt = prompt.replace(regex, JSON.stringify(data[key]));
+    }
+
+    const completion = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt,
+      max_tokens: 1024,
+      n: 1,
+      stop: null,
+      temperature: 0.7,
+    });
+
+    const response = completion.data.choices[0].text;
+    const match = response.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
+    const type = match[1];
+    const content = JSON.parse(match[2]);
+
+    setData(() => ({
+      ...data,
+      [type]: [...data[type], content],
+    }));
+  };
+
+  return <CurrentStage input={input} data={data} send={send} setStage={setStage} />;
+};
+
+const CharacterStage =({ data, send, setStage })=>
+  <PromptForm
+    // TODO
+    /*
+`
 Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
 
 <character_template>
@@ -10,28 +73,34 @@ Copy and edit the template below (including the wrapping XML tags) in your respo
 }
 </character_template>`
 
+    setStage(ChallengeStage);
+*/
+  ></PromptForm>
 
-
-challenge =`
+const ChallengeStage =({ data, send, setStage })=>
+  <PromptForm // TODO: instead of `PromptForm`, `PromptCompletion`, because this prompt goes to the LLM not the user
+    // TODO
+    /*
+`
 Generate an original challenge for a comedy game show with characters:
 {{ character }}
 
-Use this template (including the wrapping XML tags) to structure your response:
+Use the template (including the wrapping XML tags) to structure your response.  Here are definitions for what should go in the keys:
+  name: A pun name on the premise of the challenge.
+  text: A summary of the challenge premise or objective.  Include all rules or requirements for the task.
+  
 <challenge_template>{
-  "name": " name ",
-  "text": " \
-    [Summary of the challenge premise or objective] \
-   \
-    1. [Rule or requirement 1] \
-    2. [Rule or requirement 2] \
-    3. [Rule or requirement 3] \
-    4. [Rule or requirement 4] \
-  "
+  "name": name,
+  "text": text,
 }</challenge_template>`
 
+    setStage(SceneStage);
+*/
+  ></PromptForm>
 
+/* TODO: component using PromptForm
 
-strategy =`
+`
 Come up with a strategy for your character for the challenge.
 
 <strategy_template>
@@ -39,9 +108,12 @@ Come up with a strategy for your character for the challenge.
 </strategy_template>
 `
 
+*/
 
-
-scene =`
+// TODO: convert to using `PromptCompletion`
+const SceneStage = ({ data, send, setStage }) => {
+  const handleSubmit = () => {
+    send(`
 Write a script for the following characters attempts at the challenge based on their provided strategies:
 
 {{ challenge }}
@@ -63,10 +135,24 @@ Use this template (including the wrapping XML tags) to structure your response:
     [ ... ] \
   "
 }</scene_template>`
+    );
+    setStage(CritiqueStage);
+  };
 
+  return (
+    <div>
+      <h2>Scene Stage</h2>
+      <pre>{JSON.stringify(data.scene, null, 2)}</pre>
+      <button onClick={handleSubmit}>Next</button>
+    </div>
+  );
+};
 
-
-critique =`
+const CritiqueStage =({ data, send, setStage })=>
+  <PromptCompletion
+    // TODO
+    /*
+    `
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
 
@@ -92,88 +178,7 @@ Use this template (including the wrapping XML tags) to structure your critique:
     [score 0-5, preferrable <= 3] \
   "
 }</critique_template>`
-
-
-
-import React, { useState } from 'react';
-import { Configuration, OpenAIApi } from 'openai';
-const configuration = new Configuration({
-  apiKey: 'YOUR_API_KEY',
-});
-const openai = new OpenAIApi(configuration);
-
-const App = () => {
-  const [state, setState] = useState({
-    stage: 'initial',
-    data: {
-      character: {},
-      challenge: {},
-      scene: {},
-      critique: {},
-    },
-  });
-
-  const send = async (template, data) => {
-    let prompt = template;
-
-    for (const key in state.data) {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      prompt = prompt.replace(regex, JSON.stringify(state.data[key]));
-    }
-
-    const completion = await openai.createCompletion({
-      model: 'text-davinci-003',
-      prompt: `${systemPrompt}\n\n${prompt}`,
-      max_tokens: 1024,
-      n: 1,
-      stop: null,
-      temperature: 0.7,
-    });
-
-    const response = completion.data.choices[0].text;
-    const match = response.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
-    const entityType = match[1];
-    const content = JSON.parse(match[2]);
-
-    setState((prevState) => ({
-      ...prevState,
-      stage: stageTransitions[prevState.stage][entityType] || prevState.stage,
-      data: {
-        ...prevState.data,
-        [entityType]: { ...prevState.data[entityType], ...content },
-      },
-    }));
-  };
-
-  const stageTransitions = {
-    initial: { character: CharacterStage },
-    character: { challenge: ChallengeStage },
-    challenge: { scene: SceneStage },
-    scene: { critique: CritiqueStage },
-    critique: { initial: InitialStage },
-  };
-
-  const CurrentStage = stageTransitions[state.stage][state.data[state.stage]] || InitialStage;
-
-  return <CurrentStage data={state.data[state.stage]} send={send} />;
-};
-
-const InitialStage = ({ send }) => {
-  return <button onClick={() => send(`<character_template>{}</character_template>`)}>Start</button>;
-};
-
-const CharacterStage = ({ data, send }) => {
-  return (
-    <div>
-      <h2>Character Stage</h2>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-      <button onClick={() => send(`<challenge_template>{}</challenge_template>`)}>Next</button>
-    </div>
-  );
-};
-
-const ChallengeStage = ({ data, send }) => <div>Challenge Stage</div>;
-const SceneStage = ({ data, send }) => <div>Scene Stage</div>;
-const CritiqueStage = ({ data, send }) => <div>Critique Stage</div>;
+*/
+  ></PromptCompletion>
 
 export default App;
