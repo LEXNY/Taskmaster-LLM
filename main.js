@@ -145,7 +145,7 @@ Use this template (including the wrapping XML tags) to structure your response:
 
 
 ///////////////////////////////////
-const CritiqueStage =({ data, send, setStage })=> <MachinePrompt data={data} setData={setData}
+const CritiqueStage =({ data, setStage })=> <MachinePrompt data={data} setData={setData}
 template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
