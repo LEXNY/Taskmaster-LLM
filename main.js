@@ -1,50 +1,141 @@
-// PREPOSTEROUS GAUNTLET
+import React, { useState } from 'react'
+import { Configuration, OpenAIApi } from 'openai'
+const configuration = new Configuration({
+  apiKey: 'TODO',
+})
+const openai = new OpenAIApi(configuration)
 
 
-//// TEMPLATES ////
+// an extracted structure can either be an template entity object or a complete entity object.
+const extract =({text, data})=>{
+  const match = text.match(/<(\w+)_template>(.*?)<\/\1_template>/s)
+  const type = match[1]
+  const structure = JSON.parse(match[2])
+  return {
+    structure,
+    // for passing to `setData`
+    set :({data})=> ({
+      ...data, 
+      [type]: [...data[type], structure]
+    })
+}
 
-character =`
-Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
+// Render prompt templates and update data from user responses.
+// Accept an `Info` component prop, wherein we pass the prompt for type-bespoke rendering.
+const UserPrompt =({data, setData, template, nextStage, Info})=>{
+  const {structure, update} = extract({text: template, data})
+  const [input, setInput] = useState(JSON.stringify(structure))
+  return <div>
+    <Info prompt={prompt}></Info>
+    <textarea onChange={({target: {value}})=>setInput(value)} defaultValue={input}></textarea>
+    <button onClick={setData(update) && nextStage()}>proceed</button>
+  </div>
+}
 
+// Accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering.
+const MachinePrompt =({data, setData, template, nextStage, Info})=>{
+  const [structure, updateStructure] = useState({})  
+  useEffect(()=>{
+    let prompt = template
+    for (const key in data) {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
+      prompt = prompt.replace(regex, JSON.stringify(data[key]))
+    }
+    const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
+    const {structure, update} = extract({text, data})
+    setData(update)
+  })
+  return <div>
+    <Info structure={structure}></Info>
+    <button onClick={()=> nextStage && nextStage()}>proceed</button>
+  </div>
+}
+
+const App =()=>{
+  const [CurrentStage, setStage] = useState(CharacterStage)
+  const [data, setData] = useState({
+    character: [],
+    challenge: [],
+    scene:     [],
+    critique:  [],
+  })
+  return <CurrentStage data={data} setData={setData} setStage={setStage} />
+}
+
+
+///////////////////////////////////
+const CharacterStage =({ data, setData, setStage })=> <UserPrompt data={data} setData={setData}
+nextStage={()=> setStage(ChallengeStage)}
+
+Info={()=><p>
+  Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
+</p>}
+
+template={`
 <character_template>
 {
   "name": "name here",
   "description": "description"
 }
-</character_template>`
+</character_template>
+`></UserPrompt>
+///////////////////////////////////
 
 
+///////////////////////////////////
+const ChallengeStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
+nextStage={()=> setStage(StrategyStage)}
 
-challenge =`
+Info={({challenge})=><p>
+  {JSON.stringify(challenge)}
+</p>}
+
+template={`
 Generate an original challenge for a comedy game show with characters:
 {{ character }}
 
-Use this template (including the wrapping XML tags) to structure your response:
+Use the template (including the wrapping XML tags) to structure your response.  Here are definitions for what should go in the keys:
+  name: A pun name on the premise of the challenge.
+  text: A summary of the challenge premise or objective.  Include all rules or requirements for the task.
+  
 <challenge_template>{
-  "name": " name ",
-  "text": " \
-    [Summary of the challenge premise or objective] \
-   \
-    1. [Rule or requirement 1] \
-    2. [Rule or requirement 2] \
-    3. [Rule or requirement 3] \
-    4. [Rule or requirement 4] \
-  "
-}</challenge_template>`
+  "name": name,
+  "text": text,
+}</challenge_template>
+`>
+
+</MachinePrompt>
+///////////////////////////////////
 
 
+///////////////////////////////////
+const StrategyStage =({ data, setData, setStage })=> <UserPrompt data={data} setData={setData}
+nextStage={()=> setStage(SceneStage)}
 
-strategy =`
-Come up with a strategy for your character for the challenge.
+Info={()=><p>
+  Come up with a strategy for your character for the challenge:
+  {JSON.stringify(data.challenge)}
+</p>}
 
+template={`
 <strategy_template>
 " strategy in quotes "
 </strategy_template>
-`
+`>
+</UserPrompt>
+///////////////////////////////////
 
 
+///////////////////////////////////
+const SceneStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
+nextStage={()=> setStage(CritiqueStage)}
 
-scene =`
+Info={({scene: {name, text}})=><div>
+  <h3>{name}</h3>
+  <p>{text}</p>
+</div>}
+
+template={`
 Write a script for the following characters attempts at the challenge based on their provided strategies:
 
 {{ challenge }}
@@ -65,11 +156,21 @@ Use this template (including the wrapping XML tags) to structure your response:
     [ line or action ] \
     [ ... ] \
   "
-}</scene_template>`
+}</scene_template>
+
+`></MachinePrompt>
+///////////////////////////////////
 
 
+///////////////////////////////////
+const CritiqueStage =({ data, setStage })=> <MachinePrompt data={data} setData={setData}
 
-critique =`
+Info={({critique})=><div>
+  <h3>{critique.name}</h3>
+  <p>{critique.text}</p>
+</div>}
+
+template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
 
@@ -94,52 +195,8 @@ Use this template (including the wrapping XML tags) to structure your critique:
  \
     [score 0-5, preferrable <= 3] \
   "
-}</critique_template>`
+}</critique_template>
+`></MachinePrompt>
+///////////////////////////////////
 
-
-
-//// DECLARE ////
-
-const data = {
-  character: {},
-  challenge: {},
-  scene: {},
-  critique: {},
-}
-
-const extract = (response) => {
-  const match = response.match(/<(\w+)_template>(.*)<\/\w+>/s)
-  const entityType = match[1]
-  const content = JSON.parse(match[2])
-  return { entityType, content }
-}
-
-async function send(template, recipient) {
-  let prompt = template
-  const type = extract(template).entityType
-  const schema = Object.keys(extract(template).content)
-
-  for (const key in data) {
-    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
-    prompt = prompt.replace(regex, data[type][key])
-  }
-
-  const { content } = extract(await recipient(prompt))
-  data[type][content.name] = content
-}
-
-
-
-//// EPISODE FORMAT ////
-
-async function episode() {
-  await send(character, user)
-  
-  for (let i = 0; i < 3; i++) {
-    await send(challenge, robo)
-    await send(strategy,  user)
-    await send(scene,     robo)
-    await send(critique,  robo)
-  }
-}
-episode()
+export default App;
