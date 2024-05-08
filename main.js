@@ -62,11 +62,11 @@ const App =()=>{
   return <CurrentStage data={data} setData={setData} setStage={setStage} />
 }
 
-const CharacterStage =({ data, setData, setStage })=>
-  <UserPrompt
-    // TODO
-    /*
-`
+
+///////////////////////////////////
+const CharacterStage =({ data, setData, setStage })=> <UserPrompt data={data} setData={setData}
+nextStage={()=> setStage(ChallengeStage)}
+template={`
 Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
 
 <character_template>
@@ -74,11 +74,9 @@ Copy and edit the template below (including the wrapping XML tags) in your respo
   "name": "name here",
   "description": "description"
 }
-</character_template>`
-
-    setStage(ChallengeStage);
-*/
-  ></PromptForm>
+</character_template>
+`></UserPrompt>
+///////////////////////////////////
 
 
 ///////////////////////////////////
@@ -103,7 +101,7 @@ Use the template (including the wrapping XML tags) to structure your response.  
 
 
 ///////////////////////////////////
-const StrategyStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
+const StrategyStage =({ data, setData, setStage })=> <UserPrompt data={data} setData={setData}
 nextStage={()=> setStage(SceneStage)}
 template={`
 Come up with a strategy for your character for the challenge.
@@ -111,7 +109,7 @@ Come up with a strategy for your character for the challenge.
 <strategy_template>
 " strategy in quotes "
 </strategy_template>
-`></MachinePrompt>
+`></UserPrompt>
 ///////////////////////////////////
 
 
