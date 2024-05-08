@@ -6,45 +6,49 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration)
 
 
-// an extracted structure can either be the JSON template of an entity or a completed entity.
+// an extracted structure can either be an template entity object or a complete entity object.
 const extract =({text, data})=>{
   const match = text.match(/<(\w+)_template>(.*?)<\/\1_template>/s)
   const type = match[1]
-  const structure = JSON.parse(match[2]) // TODO: allow extracting this, for UserPrompt.  Return {structure, set: ({data})=>(...)}
-  return ({data})=>({
-    ...data,
-    [type]: [...data[type], structure],
-  })
+  const structure = JSON.parse(match[2])
+  return {
+    structure,
+    // for passing to `setData`
+    set :({data})=> ({
+      ...data, 
+      [type]: [...data[type], structure]
+    })
 }
 
-// higher-order form component for the user to view prompt templates and fill in the response
+// Render prompt templates and update data from user responses.
+// TODO: accept an `Info` component prop, wherein we pass the prompt for type-bespoke rendering.
 const UserPrompt =({data, setData, template, nextStage})=>{
-  // TODO
   const {structure, update} = extract({text: template, data})
-  ///
   const [input, setInput] = useState(JSON.stringify(structure))
-  return <>
+  return <div>
     <p>{prompt}</p>
-    <textarea onChange={({target: {value}})=>setInput(value)} value={TODO is value correct? `input`}></textarea>
-    <button onClick={setData(extract(input).set({data})) && nextStage()}>proceed</button>
-  </>
+    <textarea onChange={({target: {value}})=>setInput(value)} defaultValue={input}></textarea>
+    <button onClick={setData(update) && nextStage()}>proceed</button>
+  </div>
 }
 
+// TODO: accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering
 const MachinePrompt =({data, setData, template, nextStage})=>{
-  // TODO: useState
-  // structure, update
-  
-  // TODO: useEffect
-  let prompt = template
-  for (const key in data) {
-    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
-    prompt = prompt.replace(regex, JSON.stringify(data[key]))
-  }
-  const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
-  const {structure, update} = extract({text, data})
-  setData(update)
-  nextStage && nextStage()
-  return <>{structure}</>
+  const [structure, updateStructure] = useState({})  
+  useEffect(()=>{
+    let prompt = template
+    for (const key in data) {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
+      prompt = prompt.replace(regex, JSON.stringify(data[key]))
+    }
+    const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
+    const {structure, update} = extract({text, data})
+    setData(update)
+  })
+  return <div>
+    {JSON.stringify(structure)}
+    <button onClick={()=> nextStage && nextStage()}>proceed</button>
+  </div>
 }
 
 const App =()=>{
@@ -76,11 +80,11 @@ Copy and edit the template below (including the wrapping XML tags) in your respo
 */
   ></PromptForm>
 
-const ChallengeStage =({ data, send, setStage })=>
-  <MachinePrompt
-    // TODO
-    /*
-`
+
+///////////////////////////////////
+const ChallengeStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
+nextStage={()=> setStage(StrategyStage)}
+template={`
 Generate an original challenge for a comedy game show with characters:
 {{ character }}
 
@@ -91,11 +95,11 @@ Use the template (including the wrapping XML tags) to structure your response.  
 <challenge_template>{
   "name": name,
   "text": text,
-}</challenge_template>`
-
-    setStage(SceneStage);
-*/
-  >/* TODO:   {data.challenge.last}    // ??? */</MachinePrompt>
+}</challenge_template>
+`>
+  {JSON.stringify(data.challenge)}
+</MachinePrompt>
+///////////////////////////////////
 
 
 ///////////////////////////////////
@@ -140,6 +144,7 @@ Use this template (including the wrapping XML tags) to structure your response:
 ///////////////////////////////////
 
 
+///////////////////////////////////
 const CritiqueStage =({ data, send, setStage })=> <MachinePrompt data={data} setData={setData}
 template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
