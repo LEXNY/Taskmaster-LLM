@@ -22,6 +22,7 @@ const extract =({text, data})=>{
 
 // Render prompt templates and update data from user responses.
 // TODO: accept an `Info` component prop, wherein we pass the prompt for type-bespoke rendering.
+// return <><Info structure={structure}></Info> <button>...</>
 const UserPrompt =({data, setData, template, nextStage})=>{
   const {structure, update} = extract({text: template, data})
   const [input, setInput] = useState(JSON.stringify(structure))
@@ -33,6 +34,7 @@ const UserPrompt =({data, setData, template, nextStage})=>{
 }
 
 // TODO: accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering
+// return <><Info structure={structure}></Info> <button>...</>
 const MachinePrompt =({data, setData, template, nextStage})=>{
   const [structure, updateStructure] = useState({})  
   useEffect(()=>{
