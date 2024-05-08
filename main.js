@@ -21,21 +21,19 @@ const extract =({text, data})=>{
 }
 
 // Render prompt templates and update data from user responses.
-// TODO: accept an `Info` component prop, wherein we pass the prompt for type-bespoke rendering.
-// return <><Info structure={structure}></Info> <button>...</>
-const UserPrompt =({data, setData, template, nextStage})=>{
+// Accept an `Info` component prop, wherein we pass the prompt for type-bespoke rendering.
+const UserPrompt =({data, setData, template, nextStage, Info})=>{
   const {structure, update} = extract({text: template, data})
   const [input, setInput] = useState(JSON.stringify(structure))
   return <div>
-    <p>{prompt}</p>
+    <Info prompt={prompt}></Info>
     <textarea onChange={({target: {value}})=>setInput(value)} defaultValue={input}></textarea>
     <button onClick={setData(update) && nextStage()}>proceed</button>
   </div>
 }
 
-// TODO: accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering
-// return <><Info structure={structure}></Info> <button>...</>
-const MachinePrompt =({data, setData, template, nextStage})=>{
+// Accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering.
+const MachinePrompt =({data, setData, template, nextStage, Info})=>{
   const [structure, updateStructure] = useState({})  
   useEffect(()=>{
     let prompt = template
@@ -48,7 +46,7 @@ const MachinePrompt =({data, setData, template, nextStage})=>{
     setData(update)
   })
   return <div>
-    {JSON.stringify(structure)}
+    <Info structure={structure}></Info>
     <button onClick={()=> nextStage && nextStage()}>proceed</button>
   </div>
 }
@@ -68,9 +66,12 @@ const App =()=>{
 ///////////////////////////////////
 const CharacterStage =({ data, setData, setStage })=> <UserPrompt data={data} setData={setData}
 nextStage={()=> setStage(ChallengeStage)}
-template={`
-Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
 
+Info={()=><p>
+  Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
+</p>}
+
+template={`
 <character_template>
 {
   "name": "name here",
@@ -84,6 +85,11 @@ Copy and edit the template below (including the wrapping XML tags) in your respo
 ///////////////////////////////////
 const ChallengeStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
 nextStage={()=> setStage(StrategyStage)}
+
+Info={({challenge})=><p>
+  {JSON.stringify(challenge)}
+</p>}
+
 template={`
 Generate an original challenge for a comedy game show with characters:
 {{ character }}
@@ -97,7 +103,7 @@ Use the template (including the wrapping XML tags) to structure your response.  
   "text": text,
 }</challenge_template>
 `>
-  {JSON.stringify(data.challenge)}
+
 </MachinePrompt>
 ///////////////////////////////////
 
@@ -105,19 +111,30 @@ Use the template (including the wrapping XML tags) to structure your response.  
 ///////////////////////////////////
 const StrategyStage =({ data, setData, setStage })=> <UserPrompt data={data} setData={setData}
 nextStage={()=> setStage(SceneStage)}
-template={`
-Come up with a strategy for your character for the challenge.
 
+Info={()=><p>
+  Come up with a strategy for your character for the challenge:
+  {JSON.stringify(data.challenge)}
+</p>}
+
+template={`
 <strategy_template>
 " strategy in quotes "
 </strategy_template>
-`></UserPrompt>
+`>
+</UserPrompt>
 ///////////////////////////////////
 
 
 ///////////////////////////////////
 const SceneStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
 nextStage={()=> setStage(CritiqueStage)}
+
+Info={({scene: {name, text}})=><div>
+  <h3>{name}</h3>
+  <p>{text}</p>
+</div>}
+
 template={`
 Write a script for the following characters attempts at the challenge based on their provided strategies:
 
@@ -140,12 +157,19 @@ Use this template (including the wrapping XML tags) to structure your response:
     [ ... ] \
   "
 }</scene_template>
+
 `></MachinePrompt>
 ///////////////////////////////////
 
 
 ///////////////////////////////////
 const CritiqueStage =({ data, setStage })=> <MachinePrompt data={data} setData={setData}
+
+Info={({critique})=><div>
+  <h3>{critique.name}</h3>
+  <p>{critique.text}</p>
+</div>}
+
 template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
