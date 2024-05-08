@@ -5,23 +5,51 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-// TODO: higher-order form component for the user to view prompt templates and fill in the response
-// TODO: will require extracting common parsing logic, so that the textarea input can be parsed.
-const PromptForm =({data, setData, template, nextStage, send})=><>
-  <p>{prompt}</p>
-  <textarea>TODO</textarea>
-  <button onClick={TODO}>
-    TODO
-  </button>
-</>
 
-const PromptCompletion =({data, setData, template, nextStage, send})=>{
-  // TODO: `useEffect` and call `send` directly?
+const extract =(text)=>{
+  const match = text.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
+  const type = match[1];
+  const content = JSON.parse(match[2]);
+  return (data)=>{
+    ...data,
+    [type]: [...data[type], content],
+  }
+}
+
+// higher-order form component for the user to view prompt templates and fill in the response
+const PromptForm =({data, setData, template, nextStage})=>{
+  // TODO: useState input
+  // TODO: setData(extract(input)(data)) && nextStage()
+  return <>
+    <p>{prompt}</p>
+    <textarea>TODO</textarea>
+    <button onClick={TODO}>
+      TODO
+    </button>
+  </>
+}
+
+const PromptCompletion =({data, setData, template, nextStage})=>{
+    let prompt = template;
+
+    for (const key in data) {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      prompt = prompt.replace(regex, JSON.stringify(data[key]));
+    }
+  
+      const response = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt,
+      max_tokens: 1024,
+      n: 1,
+      stop: null,
+      temperature: 0.7,
+    }).data.choices[0].text
+    setData(extract(response)(data))
 }
 
 const App = () => {
   const [CurrentStage, setStage] = useState(CharacterStage);
-  const [input, setInput] = useState('');
   const [data, setData] = useState({
     character: [],
     challenge: [],
@@ -29,40 +57,10 @@ const App = () => {
     critique:  [],
   });
 
-  const send = async (template, data) => {
-    let prompt = template;
-
-    for (const key in data) {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      prompt = prompt.replace(regex, JSON.stringify(data[key]));
-    }
-
-    const completion = await openai.createCompletion({
-      model: 'text-davinci-003',
-      prompt,
-      max_tokens: 1024,
-      n: 1,
-      stop: null,
-      temperature: 0.7,
-    });
-
-    // TODO: extract common parsing logic /////
-    const response = completion.data.choices[0].text;
-    const match = response.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
-    const type = match[1];
-    const content = JSON.parse(match[2]);
-
-    setData(() => ({
-      ...data,
-      [type]: [...data[type], content],
-    }));
-    //////////////
-  };
-
-  return <CurrentStage input={input} data={data} send={send} setStage={setStage} />;
+  return <CurrentStage data={data} setData={setData} setStage={setStage} />;
 };
 
-const CharacterStage =({ data, send, setStage })=>
+const CharacterStage =({ data, setData, setStage })=>
   <PromptForm
     // TODO
     /*
