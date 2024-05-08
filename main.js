@@ -1,67 +1,65 @@
-import React, { useState } from 'react';
-import { Configuration, OpenAIApi } from 'openai';
+import React, { useState } from 'react'
+import { Configuration, OpenAIApi } from 'openai'
 const configuration = new Configuration({
-  apiKey: 'YOUR_API_KEY',
-});
-const openai = new OpenAIApi(configuration);
+  apiKey: 'TODO',
+})
+const openai = new OpenAIApi(configuration)
 
 
-const extract =(text)=>{
-  const match = text.match(/<(\w+)_template>(.*?)<\/\1_template>/s);
-  const type = match[1];
-  const content = JSON.parse(match[2]);
-  return (data)=>{
+// an extracted structure can either be the JSON template of an entity or a completed entity.
+const extract =({text, data})=>{
+  const match = text.match(/<(\w+)_template>(.*?)<\/\1_template>/s)
+  const type = match[1]
+  const structure = JSON.parse(match[2]) // TODO: allow extracting this, for UserPrompt.  Return {structure, set: ({data})=>(...)}
+  return ({data})=>({
     ...data,
-    [type]: [...data[type], content],
-  }
+    [type]: [...data[type], structure],
+  })
 }
 
 // higher-order form component for the user to view prompt templates and fill in the response
-const PromptForm =({data, setData, template, nextStage})=>{
-  // TODO: useState input
-  // TODO: setData(extract(input)(data)) && nextStage()
+const UserPrompt =({data, setData, template, nextStage})=>{
+  // TODO
+  const {structure, update} = extract({text: template, data})
+  ///
+  const [input, setInput] = useState(JSON.stringify(structure))
   return <>
     <p>{prompt}</p>
-    <textarea>TODO</textarea>
-    <button onClick={TODO}>
-      TODO
-    </button>
+    <textarea onChange={({target: {value}})=>setInput(value)} value={TODO is value correct? `input`}></textarea>
+    <button onClick={setData(extract(input).set({data})) && nextStage()}>proceed</button>
   </>
 }
 
-const PromptCompletion =({data, setData, template, nextStage})=>{
-    let prompt = template;
-
-    for (const key in data) {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      prompt = prompt.replace(regex, JSON.stringify(data[key]));
-    }
+const MachinePrompt =({data, setData, template, nextStage})=>{
+  // TODO: useState
+  // structure, update
   
-      const response = await openai.createCompletion({
-      model: 'text-davinci-003',
-      prompt,
-      max_tokens: 1024,
-      n: 1,
-      stop: null,
-      temperature: 0.7,
-    }).data.choices[0].text
-    setData(extract(response)(data))
+  // TODO: useEffect
+  let prompt = template
+  for (const key in data) {
+    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
+    prompt = prompt.replace(regex, JSON.stringify(data[key]))
+  }
+  const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
+  const {structure, update} = extract({text, data})
+  setData(update)
+  nextStage && nextStage()
+  return <>{structure}</>
 }
 
-const App = () => {
-  const [CurrentStage, setStage] = useState(CharacterStage);
+const App =()=>{
+  const [CurrentStage, setStage] = useState(CharacterStage)
   const [data, setData] = useState({
     character: [],
     challenge: [],
     scene:     [],
     critique:  [],
-  });
-
-  return <CurrentStage data={data} setData={setData} setStage={setStage} />;
-};
+  })
+  return <CurrentStage data={data} setData={setData} setStage={setStage} />
+}
 
 const CharacterStage =({ data, setData, setStage })=>
-  <PromptForm
+  <UserPrompt
     // TODO
     /*
 `
@@ -79,7 +77,7 @@ Copy and edit the template below (including the wrapping XML tags) in your respo
   ></PromptForm>
 
 const ChallengeStage =({ data, send, setStage })=>
-  <PromptForm // TODO: instead of `PromptForm`, `PromptCompletion`, because this prompt goes to the LLM not the user
+  <MachinePrompt
     // TODO
     /*
 `
@@ -97,24 +95,26 @@ Use the template (including the wrapping XML tags) to structure your response.  
 
     setStage(SceneStage);
 */
-  ></PromptForm>
+  >/* TODO:   {data.challenge.last}    // ??? */</MachinePrompt>
 
-/* TODO: component using PromptForm
 
-`
+///////////////////////////////////
+const StrategyStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
+nextStage={()=> setStage(SceneStage)}
+template={`
 Come up with a strategy for your character for the challenge.
 
 <strategy_template>
 " strategy in quotes "
 </strategy_template>
-`
+`></MachinePrompt>
+///////////////////////////////////
 
-*/
 
-// TODO: convert to using `PromptCompletion`
-const SceneStage = ({ data, send, setStage }) => {
-  const handleSubmit = () => {
-    send(`
+///////////////////////////////////
+const SceneStage =({ data, setData, setStage })=> <MachinePrompt data={data} setData={setData}
+nextStage={()=> setStage(CritiqueStage)}
+template={`
 Write a script for the following characters attempts at the challenge based on their provided strategies:
 
 {{ challenge }}
@@ -135,25 +135,13 @@ Use this template (including the wrapping XML tags) to structure your response:
     [ line or action ] \
     [ ... ] \
   "
-}</scene_template>`
-    );
-    setStage(CritiqueStage);
-  };
+}</scene_template>
+`></MachinePrompt>
+///////////////////////////////////
 
-  return (
-    <div>
-      <h2>Scene Stage</h2>
-      <pre>{JSON.stringify(data.scene, null, 2)}</pre>
-      <button onClick={handleSubmit}>Next</button>
-    </div>
-  );
-};
 
-const CritiqueStage =({ data, send, setStage })=>
-  <PromptCompletion
-    // TODO
-    /*
-    `
+const CritiqueStage =({ data, send, setStage })=> <MachinePrompt data={data} setData={setData}
+template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
 
@@ -178,8 +166,8 @@ Use this template (including the wrapping XML tags) to structure your critique:
  \
     [score 0-5, preferrable <= 3] \
   "
-}</critique_template>`
-*/
-  ></PromptCompletion>
+}</critique_template>
+`></MachinePrompt>
+///////////////////////////////////
 
 export default App;
