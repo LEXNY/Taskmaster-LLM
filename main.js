@@ -71,6 +71,7 @@ Info={()=><p>
   Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
 </p>}
 
+// TODO: no more XML for user input
 template={`
 <character_template>
 {
