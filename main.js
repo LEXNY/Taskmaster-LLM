@@ -6,33 +6,23 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration)
 
 
-// an extracted structure can either be an template entity object or a complete entity object.
-const extract =({text, data})=>{
-  const match = text.match(/<(\w+)_template>(.*?)<\/\1_template>/s)
-  const type = match[1]
-  const structure = JSON.parse(match[2])
-  return {
-    structure,
-    // for passing to `setData`
-    set :({data})=> ({
-      ...data, 
-      [type]: [...data[type], structure]
-    })
-  }
-}
-
 // Render prompt templates and update data from user responses.
 // Accept an `Info` component prop, wherein we pass the prompt for type-bespoke rendering.
-const UserPrompt =({data, setData, template, nextStage, Info})=>{
-  const {structure, update} = extract({text: template, data})
-  const [input, setInput] = useState(JSON.stringify(structure))
+const UserPrompt =({data, setData, template, nextStage, Info})=>{ // TODO: type
+  const [input, setInput] = useState('')
   return <div>
     <Info prompt={prompt}></Info>
-    <textarea onChange={({target: {value}})=>setInput(value)} defaultValue={input}></textarea>
-    <button onClick={setData(update) && nextStage()}>proceed</button>
+    <textarea
+      onChange={({target: {value}})=>setInput(value)}
+      defaultValue={input}
+    ></textarea>
+    <button
+      onClick={setData({...data, [type]: [...data[type], input]}) && nextStage()}
+    >proceed</button>
   </div>
 }
 
+// Prompt the LLM according a prompt template and game state.  Then show the user the results.
 // Accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering.
 const MachinePrompt =({data, setData, template, nextStage, Info})=>{
   const [structure, setStructure] = useState({})
@@ -45,9 +35,8 @@ const MachinePrompt =({data, setData, template, nextStage, Info})=>{
     }
     try {
       const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
-      const {structure, update} = extract({text, data})
-      setStructure(structure)
-      setData(update)
+      const structure = JSON.parse(text.match(/<(\w+)_template>(.*?)<\/\1_template>/s))[2]
+      setData({...data, [type]: [...data[type], structure]})
     } catch {}
   }, [retryCount])
   return <div>
