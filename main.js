@@ -54,7 +54,7 @@ const App =()=>{
     scene:     [],
     critique:  [],
   })
-  return <CurrentStage data={data} setData={setData} setStage={setStage} /> :
+  return <CurrentStage data={data} setData={setData} setStage={setStage} />
 }
 
 
