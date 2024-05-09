@@ -45,6 +45,7 @@ const MachinePrompt =({data, setData, template, nextStage, Info})=>{
     const {structure, update} = extract({text, data})
     setData(update)
   })
+  // TODO: 'retry' button
   return <div>
     <Info structure={structure}></Info>
     <button onClick={()=> nextStage && nextStage()}>proceed</button>
