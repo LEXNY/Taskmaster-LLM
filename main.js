@@ -18,6 +18,7 @@ const extract =({text, data})=>{
       ...data, 
       [type]: [...data[type], structure]
     })
+  }
 }
 
 // Render prompt templates and update data from user responses.
@@ -34,21 +35,25 @@ const UserPrompt =({data, setData, template, nextStage, Info})=>{
 
 // Accept an `Info` component prop, wherein we pass the structure for type-bespoke rendering.
 const MachinePrompt =({data, setData, template, nextStage, Info})=>{
-  const [structure, updateStructure] = useState({})  
+  const [structure, setStructure] = useState({})
+  const [retryCount, setRetryCount] = useState(0)
   useEffect(()=>{
     let prompt = template
     for (const key in data) {
       const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
       prompt = prompt.replace(regex, JSON.stringify(data[key]))
     }
-    const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
-    const {structure, update} = extract({text, data})
-    setData(update)
-  })
-  // TODO: 'retry' button
+    try {
+      const {text} = await openai.createCompletion({model: 'text-davinci-003', prompt, max_tokens: 1024}).data.choices[0]
+      const {structure, update} = extract({text, data})
+      setStructure(structure)
+      setData(update)
+    } catch {}
+  }, [retryCount])
   return <div>
     <Info structure={structure}></Info>
     <button onClick={()=> nextStage && nextStage()}>proceed</button>
+    <button onClick={()=> setRetryCount(retryCount + 1)}>retry</button>
   </div>
 }
 
@@ -60,7 +65,7 @@ const App =()=>{
     scene:     [],
     critique:  [],
   })
-  return <CurrentStage data={data} setData={setData} setStage={setStage} />
+  return <CurrentStage data={data} setData={setData} setStage={setStage} /> :
 }
 
 
@@ -69,18 +74,15 @@ const CharacterStage =({ data, setData, setStage })=> <UserPrompt data={data} se
 nextStage={()=> setStage(ChallengeStage)}
 
 Info={()=><p>
-  Copy and edit the template below (including the wrapping XML tags) in your response to create your character.
+  Edit the template below to create your character.
 </p>}
 
-// TODO: no more XML for user input
 template={`
-<character_template>
 {
   "name": "name here",
   "description": "description"
-}
-</character_template>
-`></UserPrompt>
+}`}
+></UserPrompt>
 ///////////////////////////////////
 
 
@@ -103,10 +105,8 @@ Use the template (including the wrapping XML tags) to structure your response.  
 <challenge_template>{
   "name": name,
   "text": text,
-}</challenge_template>
-`>
-
-</MachinePrompt>
+}</challenge_template>`}
+></MachinePrompt>
 ///////////////////////////////////
 
 
@@ -119,11 +119,8 @@ Info={()=><p>
   {JSON.stringify(data.challenge)}
 </p>}
 
-template={`
-<strategy_template>
-" strategy in quotes "
-</strategy_template>
-`>
+template={``}
+>
 </UserPrompt>
 ///////////////////////////////////
 
@@ -158,9 +155,8 @@ Use this template (including the wrapping XML tags) to structure your response:
     [ line or action ] \
     [ ... ] \
   "
-}</scene_template>
-
-`></MachinePrompt>
+}</scene_template>`}
+></MachinePrompt>
 ///////////////////////////////////
 
 
@@ -197,8 +193,8 @@ Use this template (including the wrapping XML tags) to structure your critique:
  \
     [score 0-5, preferrable <= 3] \
   "
-}</critique_template>
-`></MachinePrompt>
+}</critique_template>`}
+></MachinePrompt>
 ///////////////////////////////////
 
 export default App;
