@@ -1,7 +1,5 @@
 # Preposterous Gauntlet
 
-(TODO 90% transition from CLI to React app)
-
 Create a character and compete in the Preposterous Gauntlet!
 
 The game follows a series of steps for each episode:
