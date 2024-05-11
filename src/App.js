@@ -176,7 +176,7 @@ const MachinePrompt = ({ data, setData, template, nextStage, Info, type }) => {
 
    const fetchData = async () => {
      try {
-       const { text } = await openai.createCompletion({
+       const { text } = await openai.completions.create({
          model: 'text-davinci-003',
          prompt,
          max_tokens: 1024,
