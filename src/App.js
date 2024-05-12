@@ -43,6 +43,7 @@ const StrategyStage = ({ data, setData, setStage }) => (
    data={data}
    setData={setData}
    nextStage={() => setStage(() => SceneStage)}
+   type="strategy"
    Info={() => (
      <p>
        Come up with a strategy for your character for the challenge:
