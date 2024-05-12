@@ -25,7 +25,7 @@ const ChallengeStage = ({ data, setData, setStage }) => (
    data={data}
    setData={setData}
    nextStage={() => setStage(() => StrategyStage)}
-   Info={() => <p>{JSON.stringify(data)}</p>}
+   Info={() => <p>{data.challenge}</p>}
    type="challenge"
    template={`
 Generate an original challenge for a comedy game show with characters:
@@ -47,7 +47,7 @@ const StrategyStage = ({ data, setData, setStage }) => (
    Info={() => (
      <p>
        Come up with a strategy for your character for the challenge:
-       {JSON.stringify(data.challenge)}
+       {data.challenge}
      </p>
    )}
    template={""}
@@ -61,7 +61,7 @@ const SceneStage = ({ data, setData, setStage }) => (
    data={data}
    setData={setData}
    nextStage={() => setStage(() => CritiqueStage)}
-   Info={() => <p>{JSON.stringify(data)}</p>}
+   Info={() => <p>{data.scene}</p>}
    template={`
 Write a script for the following characters attempts at the challenge based on their provided strategies:
 
@@ -89,7 +89,7 @@ const CritiqueStage = ({ data, setData }) => (
  <MachinePrompt
    data={data}
    setData={setData}
-   Info={() => <p>{JSON.stringify(data)}</p>}
+   Info={() => <p>{data.critique}</p>}
    template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
@@ -144,7 +144,7 @@ const MachinePrompt = ({ data, setData, template, nextStage, Info, type }) => {
    let prompt = template;
    for (const key in data) {
      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-     prompt = prompt.replace(regex, JSON.stringify(data[key]));
+     prompt = prompt.replace(regex, data[key]);
    }
 
    const fetchData = async () => {
