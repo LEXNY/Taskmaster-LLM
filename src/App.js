@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { OpenAI } from 'openai';
 
-const openai = new OpenAI({ apiKey: 'TODO', dangerouslyAllowBrowser: true });
+const openai = new OpenAI({ apiKey: ' TODO PUT YOUR KEY HERE ', dangerouslyAllowBrowser: true });
 
 ///////////////////////////////////
 const CharacterStage = ({ data, setData, setStage }) => (
@@ -15,40 +15,29 @@ const CharacterStage = ({ data, setData, setStage }) => (
      </p>
    )}
    type="character"
-   template={`
-{
- "name": "name here",
- "description": "description"
-}`}
  />
-);
-///////////////////////////////////
+)
 
 ///////////////////////////////////
+
 const ChallengeStage = ({ data, setData, setStage }) => (
  <MachinePrompt
    data={data}
    setData={setData}
    nextStage={() => setStage(() => StrategyStage)}
-   Info={({ challenge }) => <p>{JSON.stringify(challenge)}</p>}
+   Info={() => <p>{JSON.stringify(data)}</p>}
    type="challenge"
    template={`
 Generate an original challenge for a comedy game show with characters:
 {{ character }}
 
-Use the template (including the wrapping XML tags) to structure your response.  Here are definitions for what should go in the keys:
- name: A pun name on the premise of the challenge.
- text: A summary of the challenge premise or objective.  Include all rules or requirements for the task.
+Place the content into the template (including the wrapping XML tags) to structure your response.  Within these tags place a summary of the challenge premise or objective.  Include all rules or requirements for the task.
  
-<challenge_template>{
- "name": name,
- "text": text,
-}</challenge_template>`}
- />
-);
-///////////////////////////////////
+<challenge_template></challenge_template>`}
+/>)
 
 ///////////////////////////////////
+
 const StrategyStage = ({ data, setData, setStage }) => (
  <UserPrompt
    data={data}
@@ -62,21 +51,16 @@ const StrategyStage = ({ data, setData, setStage }) => (
    )}
    template={""}
  />
-);
-///////////////////////////////////
+)
 
 ///////////////////////////////////
+
 const SceneStage = ({ data, setData, setStage }) => (
  <MachinePrompt
    data={data}
    setData={setData}
    nextStage={() => setStage(() => CritiqueStage)}
-   Info={({ scene: { name, text } }) => (
-     <div>
-       <h3>{name}</h3>
-       <p>{text}</p>
-     </div>
-   )}
+   Info={() => <p>{JSON.stringify(data)}</p>}
    template={`
 Write a script for the following characters attempts at the challenge based on their provided strategies:
 
@@ -92,28 +76,19 @@ The script should:
 
 Use this template (including the wrapping XML tags) to structure your response:
 <scene_template>{
- "name": " scene name ",
- "text": " \
-   [ line or action ] \
-   [ line or action ] \
-   [ ... ] \
- "
-}</scene_template>`}
- />
-);
-///////////////////////////////////
+   [ line or action ]
+   [ line or action ]
+   [ ... ]
+</scene_template>`}
+/>)
 
 ///////////////////////////////////
+
 const CritiqueStage = ({ data, setData }) => (
  <MachinePrompt
    data={data}
    setData={setData}
-   Info={({ critique }) => (
-     <div>
-       <h3>{critique.name}</h3>
-       <p>{critique.text}</p>
-     </div>
-   )}
+   Info={() => <p>{JSON.stringify(data)}</p>}
    template={`
 You are the capriciously ponderous judge of a comedy game show challenge:
 {{challenge}}
@@ -122,26 +97,23 @@ Given the character performances:
 {{scene}}
 
 Use this template (including the wrapping XML tags) to structure your critique:
-<critique_template>{
- "name": " name ",
- "text": " \
-   [Opening volley of insults lambasting the characters performance, general nature, life choices, and such with theatrical disdain.] \
-\
-   [Grudging acknowledgement of one positive moment or trait, undermined by a backhanded followup.] \
-\
-   [Explanation for the score: \
-   - Adherence to the rules \
-   - Clever lateral thinking \
-   - Humorous moments \
-   - Overall effectiveness] \
-\
-   [A parting shot insult issuing final judgement on both the performance and the character.] \
-\
-   [score 0-5, preferrable <= 3] \
- "
-}</critique_template>`}
- />
-);
+<critique_template>
+   [Opening volley of insults lambasting the characters performance, general nature, life choices, and such with theatrical disdain.]
+
+   [Grudging acknowledgement of one positive moment or trait, undermined by a backhanded followup.]
+
+   [Explanation for the score:
+   - Adherence to the rules
+   - Clever lateral thinking
+   - Humorous moments
+   - Overall effectiveness]
+
+   [A parting shot insult issuing final judgement on both the performance and the character.]
+
+   [score 0-5, preferrable <= 3] 
+</critique_template>`}
+/>)
+
 ///////////////////////////////////
 
 // Render prompt templates and update data from user responses.
@@ -149,7 +121,7 @@ const UserPrompt = ({ data, setData, template, nextStage, type, Info }) => {
  const [input, setInput] = useState('');
 
  const handleSubmit = () => {
-   setData({ ...data, [type]: [...data[type], input] });
+   setData({ ...data, [type]: input });
    nextStage();
  };
 
@@ -176,15 +148,15 @@ const MachinePrompt = ({ data, setData, template, nextStage, Info, type }) => {
 
    const fetchData = async () => {
      try {
-       const { text } = await openai.completions.create({
-         model: 'text-davinci-003',
-         prompt,
+       const response = await openai.chat.completions.create({
+         model: 'gpt-4-turbo',
+         messages: [{role: 'user', content: prompt}],
          max_tokens: 1024,
-       }).data.choices[0];
+       });
 
-       const [_, structureType, structureData] = JSON.parse(
-         text.match(/<(\w+)_template>(.*?)<\/\1_/s)
-       );
+       const text = response.choices[0].message.content
+
+       let [_, structureType, structureData] = text.match(/<(\w+)_template>(.*?)<\/\1_/s)
 
        setStructure(structureData);
        setData({ ...data, [structureType]: [...data[structureType], structureData] });
