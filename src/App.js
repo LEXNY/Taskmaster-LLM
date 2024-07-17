@@ -1,192 +1,168 @@
-import React, { useState, useEffect } from 'react';
-import { OpenAI } from 'openai';
+import React, { useState, useEffect } from 'react'
+import secretLlama from './secretLlama'
 
-const openai = new OpenAI({ apiKey: ' TODO PUT YOUR KEY HERE ', dangerouslyAllowBrowser: true });
 
-///////////////////////////////////
-const CharacterStage = ({ data, setData, setStage }) => (
- <UserPrompt
-   data={data}
-   setData={setData}
-   nextStage={() => setStage(() => ChallengeStage)}
-   Info={() => (
-     <p>
-       Edit the template below to create your character.
-     </p>
-   )}
-   type="character"
- />
-)
+const useLanguage = prompt => {
+  const [retryCount, setRetryCount] = useState(0)
 
-///////////////////////////////////
+  useEffect(() => {
+    (async () => {
+      for (const key in data) {
+        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g')
+        prompt = prompt.replace(regex, data[key])
+      }
 
-const ChallengeStage = ({ data, setData, setStage }) => (
- <MachinePrompt
-   data={data}
-   setData={setData}
-   nextStage={() => setStage(() => StrategyStage)}
-   Info={() => <p>{data.challenge}</p>}
-   type="challenge"
-   template={`
-Generate an original challenge for a comedy game show with characters:
-{{ character }}
+      try {
+        setResponse(
+          JSON.parse(
+            await secretLlama
+              .generateCompletion(prompt)
+              .match( /template>(.*?)<.template>/s )
+              [1] ))
+      } catch (error) {
+        setRetryCount(retryCount + 1)
+      }
+    })()
+  }, [retryCount])
 
-Place the content into the template (including the wrapping XML tags) to structure your response.  Within these tags place a summary of the challenge premise or objective.  Include all rules or requirements for the task.
+  return response
+}
+
+
+const CharacterStage = ({ setCharacter }) => {
+  const [input, setInput] = useState('')
+
+  return <div>
+    <p>
+      Create a character for a comedy game show.
+    </p>
  
-<challenge_template></challenge_template>`}
-/>)
+    <input>
+      value={input}
+      onChange={e => setInput(e.target.value)}
+      placeholder="[Character Name]:  [Character Description]."
+    </input>
+    <button onClick={() => setCharacter(input)}>Submit</button>
+  </div>
+}
 
-///////////////////////////////////
 
-const StrategyStage = ({ data, setData, setStage }) => (
- <UserPrompt
-   data={data}
-   setData={setData}
-   nextStage={() => setStage(() => SceneStage)}
-   type="strategy"
-   Info={() => (
-     <p>
-       Come up with a strategy for your character for the challenge:
-       {data.challenge}
-     </p>
-   )}
-   template={""}
- />
-)
+const ChallengeStage = ({ character, setChallenge }) => {
+  const challenge = useLanguage(`
+    Create a challenge for a comedy game show with the character:
+    ===
+    ${character}
+    ===
 
-///////////////////////////////////
+    Use this template to structure your challenge:
+    ===
+    [Challenge Name]
 
-const SceneStage = ({ data, setData, setStage }) => (
- <MachinePrompt
-   data={data}
-   setData={setData}
-   nextStage={() => setStage(() => CritiqueStage)}
-   Info={() => <p>{data.scene}</p>}
-   template={`
-Write a script for the following characters attempts at the challenge based on their provided strategies:
+    [Challenge Description]
 
-{{ challenge }}
+    [Rules or Requirements]
+    ===
+  `)
 
-{{ character }}
+  setChallenge(challenge)
+  return <p>{challenge}</p>
+}
 
-The script should:
-- Bring the characters stated strategies to life in an engaging, descriptive way
-- Account for how the different characters actions could intersect and influence each other
-- Highlight moments that exemplify or clash with the characters established traits/personalities
-- Leave room for creative interpretations, and mischief.
 
-Use this template (including the wrapping XML tags) to structure your response:
-<scene_template>{
-   [ line or action ]
-   [ line or action ]
-   [ ... ]
-</scene_template>`}
-/>)
+const StrategyStage = ({ character, challenge, setStrategy }) => {
+  const [input, setInput] = useState('')
 
-///////////////////////////////////
+  return <div>
+    <p>
+      Come up with a strategy for your character for the challenge:
+    </p>
+    <p>
+      {challenge}
+    </p>
+    <input
+      value={input}
+      onChange={e => setInput(e.target.value)}
+      placeholder="[Strategy Name]:  [Tactics or Actions]."
+    />
+    <button onClick={() => setStrategy(input)}>Submit</button>
+  </div>
+}
 
-const CritiqueStage = ({ data, setData }) => (
- <MachinePrompt
-   data={data}
-   setData={setData}
-   Info={() => <p>{data.critique}</p>}
-   template={`
-You are the capriciously ponderous judge of a comedy game show challenge:
-{{challenge}}
 
-Given the character performances:
-{{scene}}
+const SceneStage = ({ character, challenge, strategy, setScene }) => {
+  const scene = useLanguage(`
+    Write a script for the following characters attempts at the challenge based on their provided strategies:
+    ===
+    ${challenge}
+    ===
+    ${character}
+    ===
+    The script should:
+    - Bring the characters stated strategies to life in an engaging, descriptive way
+    - Account for how the different characters actions could intersect and influence each other
+    - Highlight moments that exemplify or clash with the characters established traits/personalities
+    - Leave room for creative interpretations, and mischief.
 
-Use this template (including the wrapping XML tags) to structure your critique:
-<critique_template>
-   [Opening volley of insults lambasting the characters performance, general nature, life choices, and such with theatrical disdain.]
+    Use this template to structure your response:
+    ===
+    [ line or action ]
+    [ line or action ]
+    [ ... ]
+    ===
+  `)
 
-   [Grudging acknowledgement of one positive moment or trait, undermined by a backhanded followup.]
+  setScene(scene)
+  return <p>{scene}</p>
+}
 
-   [Explanation for the score:
-   - Adherence to the rules
-   - Clever lateral thinking
-   - Humorous moments
-   - Overall effectiveness]
 
-   [A parting shot insult issuing final judgement on both the performance and the character.]
+const CritiqueStage = ({ character, challenge, scene, setCritique }) => {
+  const critique = useLanguage(`
+    You are the capricious judge of a comedy game show challenge:
+    ===
+    ${challenge}
+    ===
 
-   [score 0-5, preferrable <= 3] 
-</critique_template>`}
-/>)
+    Given the character performances:
+    ===
+    ${scene}
+    ===
 
-///////////////////////////////////
+    Use this template to structure your critique:
+    ===
+    [Opening volley of insults lambasting the character's performance and general life choices with theatrical disdain.]
 
-// Render prompt templates and update data from user responses.
-const UserPrompt = ({ data, setData, template, nextStage, type, Info }) => {
- const [input, setInput] = useState('');
+    [Grudging acknowledgement of one positive moment or trait, undermined by a backhanded followup.]
 
- const handleSubmit = () => {
-   setData({ ...data, [type]: input });
-   nextStage();
- };
+    [Explanation for the score:
+    - Adherence to the rules
+    - Clever lateral thinking
+    - Humorous moments
+    - Overall effectiveness]
 
- return (
-   <div>
-     <Info />
-     <textarea value={input} onChange={(e) => setInput(e.target.value)} />
-     <button onClick={handleSubmit}>Proceed</button>
-   </div>
- );
-};
+    [A parting shot insult issuing final judgement on both the performance and the character.]
+    ===
+  `)
 
-// Prompt the LLM according to a prompt template and game state. Then show the user the results.
-const MachinePrompt = ({ data, setData, template, nextStage, Info, type }) => {
- const [retryCount, setRetryCount] = useState(0);
- const [structure, setStructure] = useState({});
+  setCritique(critique)
+  return <p>{critique}</p>
+}
 
- useEffect(() => {
-   let prompt = template;
-   for (const key in data) {
-     const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-     prompt = prompt.replace(regex, data[key]);
-   }
-
-   const fetchData = async () => {
-     try {
-       const response = await openai.chat.completions.create({
-         model: 'gpt-4-turbo',
-         messages: [{role: 'user', content: prompt}],
-         max_tokens: 1024,
-       });
-
-       const text = response.choices[0].message.content
-
-       let [_, structureType, structureData] = text.match(/<(\w+)_template>(.*?)<\/\1_/s)
-
-       setStructure(structureData);
-       setData({ ...data, [structureType]: [...data[structureType], structureData] });
-     } catch (error) {
-       console.error('Error fetching data:', error);
-     }
-   };
-
-   fetchData();
- }, [retryCount, template, data]);
-
- return (
-   <div>
-     <Info structure={structure} />
-     <button onClick={nextStage}>Proceed</button>
-     <button onClick={() => setRetryCount(retryCount + 1)}>Retry</button>
-   </div>
- );
-};
 
 const App = () => {
- const [CurrentStage, setStage] = useState(() => CharacterStage);
- const [data, setData] = useState({
-   character: [],
-   challenge: [],
-   scene: [],
-   critique: [],
- });
- return CurrentStage({data, setData, setStage})
-};
+  // TODO: can use `useState` in a fixed-length loop.  Sort of AoS style.
+  // Do this to track many characters but only define `const [character, _]` (note singular).
+  const [character, setCharacter] = useState([ /* {characterName, description} */ ])
+  const [challenge, setChallenge] = useState([ /* {challengeName, description} */ ])
+  const [scenes, setScenes] = {
+    /* [challengeName]: {[characterName]: {strategyDescription, sceneText, sceneCritique}} */
+  }
 
-export default App;
+  const [CurrentStage, setStage] = useState(() => CharacterStage)
+  return <>
+    <Header>Preposterous Gauntlet</Header>
+    <CurrentStage data={data} setData={setData} setStage={setStage} />
+  </>
+}
+
+export default App
