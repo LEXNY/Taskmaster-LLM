@@ -54,7 +54,6 @@ const ChallengeStage = ({ character, setChallenge }) => {
     ${character}
     ===
 
-    Use this template to structure your challenge:
     ===
     [Challenge Name]
 
@@ -89,6 +88,7 @@ const StrategyStage = ({ character, challenge, setStrategy }) => {
 }
 
 
+                      // TODO: `strategy` as a property of `character`
 const SceneStage = ({ character, challenge, strategy, setScene }) => {
   const scene = useLanguage(`
     Write a script for the following characters attempts at the challenge based on their provided strategies:
@@ -96,12 +96,19 @@ const SceneStage = ({ character, challenge, strategy, setScene }) => {
     ${challenge}
     ===
     ${character}
+
+    ===
+    ** TODO *****************************************************
+    ** TODO: Add other characters' definitions and strategies. **
+    ** TODO *****************************************************
+    ===
+
     ===
     The script should:
     - Bring the characters stated strategies to life in an engaging, descriptive way
-    - Account for how the different characters actions could intersect and influence each other
+    - Account for how the different characters' actions could intersect and influence each other
     - Highlight moments that exemplify or clash with the characters established traits/personalities
-    - Leave room for creative interpretations, and mischief.
+    - Leave room for creative interpretations, lateral thinking, and mischief.
 
     Use this template to structure your response:
     ===
@@ -148,10 +155,40 @@ const CritiqueStage = ({ character, challenge, scene, setCritique }) => {
   return <p>{critique}</p>
 }
 
+  // TODO: state machine from CharacterStage -> ChallengeStage -> StrategyStage -> SceneStage -> CritiqueStage.
+
+// Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`.
+const Multiplex = ({ prompt, setter }) => {
+  // TODO, considering the example of scene generation:
+  //  `const Multiplex = ({ prompt /* e.g. scene prompt */, characters, setter /* e.g. scenes */ }) => {`.
+  //
+  //  for each character, when generating a scene, we consider the character's strategy in special first-person terms.
+  //  it is highlighted in a separate segment of the prompt, whereas we also consider each other character's strategy.
+  //  For all prompts, we consider the same set of all 5 character's strategies, but the prompt is generated 5 times.
+  //
+  // for(const mainCharacter of characters) {
+  //   for(const otherCharacters of characters) {
+  //     if(mainCharacter === otherCharacters) continue
+  //     const completedPrompt = prompt({ mainCharacter, otherCharacters })
+  //     return completedPrompt // { mainCharacter, otherCharacters }
+  //   }
+  // }
+  const responses = Array(4).fill().map(() => useLanguage(prompt))
+  const [input, setInput] = useState('')
+
+  return <div>
+    <input value={input} onChange={e => setInput(e.target.value)} />
+    <button
+      onClick={() => setter([...responses, input])}
+    >Submit</button>
+  </div>
+}
+
+
+
+
 
 const App = () => {
-  // TODO: can use `useState` in a fixed-length loop.  Sort of AoS style.
-  // Do this to track many characters but only define `const [character, _]` (note singular).
   const [character, setCharacter] = useState([ /* {characterName, description} */ ])
   const [challenge, setChallenge] = useState([ /* {challengeName, description} */ ])
   const [scenes, setScenes] = {
@@ -159,6 +196,7 @@ const App = () => {
   }
 
   const [CurrentStage, setStage] = useState(() => CharacterStage)
+
   return <>
     <Header>Preposterous Gauntlet</Header>
     <CurrentStage data={data} setData={setData} setStage={setStage} />
