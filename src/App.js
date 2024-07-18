@@ -157,9 +157,9 @@ const CritiqueStage = ({ character, challenge, scene, setCritique }) => {
 
   // TODO: state machine from CharacterStage -> ChallengeStage -> StrategyStage -> SceneStage -> CritiqueStage.
 
-// Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`.
+// Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`. *
 const Multiplex = ({ prompt, setter }) => {
-  // TODO, considering the example of scene generation:
+  // * TODO, considering the example of scene generation:
   //  `const Multiplex = ({ prompt /* e.g. scene prompt */, characters, setter /* e.g. scenes */ }) => {`.
   //
   //  for each character, when generating a scene, we consider the character's strategy in special first-person terms.
@@ -173,6 +173,8 @@ const Multiplex = ({ prompt, setter }) => {
   //     return completedPrompt // { mainCharacter, otherCharacters }
   //   }
   // }
+  //
+  // It should always just be about characters multiplexing.
   const responses = Array(4).fill().map(() => useLanguage(prompt))
   const [input, setInput] = useState('')
 
