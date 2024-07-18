@@ -29,6 +29,7 @@ const useLanguage = prompt => {
 }
 
 
+// TODO: state machine from CharacterStage -> ChallengeStage
 const CharacterStage = ({ setCharacter }) => {
   const [input, setInput] = useState('')
 
@@ -47,6 +48,7 @@ const CharacterStage = ({ setCharacter }) => {
 }
 
 
+// TODO: state machine from ChallengeStage -> StrategyStage
 const ChallengeStage = ({ character, setChallenge }) => {
   const challenge = useLanguage(`
     Create a challenge for a comedy game show with the character:
@@ -68,6 +70,7 @@ const ChallengeStage = ({ character, setChallenge }) => {
 }
 
 
+// TODO: state machine from StrategyStage -> SceneStage
 const StrategyStage = ({ character, challenge, setStrategy }) => {
   const [input, setInput] = useState('')
 
@@ -88,6 +91,7 @@ const StrategyStage = ({ character, challenge, setStrategy }) => {
 }
 
 
+// TODO: state machine from SceneStage -> CritiqueStage.
                       // TODO: `strategy` as a property of `character`
 const SceneStage = ({ character, challenge, strategy, setScene }) => {
   const scene = useLanguage(`
@@ -123,6 +127,7 @@ const SceneStage = ({ character, challenge, strategy, setScene }) => {
 }
 
 
+// TODO: state machine from CritiqueStage -> CharacterStage.
 const CritiqueStage = ({ character, challenge, scene, setCritique }) => {
   const critique = useLanguage(`
     You are the capricious judge of a comedy game show challenge:
@@ -155,10 +160,9 @@ const CritiqueStage = ({ character, challenge, scene, setCritique }) => {
   return <p>{critique}</p>
 }
 
-  // TODO: state machine from CharacterStage -> ChallengeStage -> StrategyStage -> SceneStage -> CritiqueStage.
 
 // Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`. *
-const Multiplex = ({ prompt, setter }) => {
+const Multiplex = ({ prompt, characters, setter }) => {
   // * TODO, considering the example of scene generation:
   //  `const Multiplex = ({ prompt /* e.g. scene prompt */, characters, setter /* e.g. scenes */ }) => {`.
   //
@@ -170,11 +174,8 @@ const Multiplex = ({ prompt, setter }) => {
   //   for(const otherCharacters of characters) {
   //     if(mainCharacter === otherCharacters) continue
   //     const completedPrompt = prompt({ mainCharacter, otherCharacters })
-  //     return completedPrompt // { mainCharacter, otherCharacters }
   //   }
   // }
-  //
-  // It should always just be about characters multiplexing.
   const responses = Array(4).fill().map(() => useLanguage(prompt))
   const [input, setInput] = useState('')
 
@@ -185,9 +186,6 @@ const Multiplex = ({ prompt, setter }) => {
     >Submit</button>
   </div>
 }
-
-
-
 
 
 const App = () => {
@@ -201,7 +199,15 @@ const App = () => {
 
   return <>
     <Header>Preposterous Gauntlet</Header>
-    <CurrentStage data={data} setData={setData} setStage={setStage} />
+    <CurrentStage
+      character={character}
+      setCharacter={setCharacter}
+      challenge={challenge}
+      setChallenge={setChallenge}
+      scenes={scenes}
+      setScenes={setScenes}
+      setStage={setStage}
+    />
   </>
 }
 
