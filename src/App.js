@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import secretLlama from './secretLlama'
 
+import { generateCompletion } from 'web-llm'
 
 const useLanguage = prompt => {
   const [retryCount, setRetryCount] = useState(0)
@@ -15,10 +15,9 @@ const useLanguage = prompt => {
       try {
         setResponse(
           JSON.parse(
-            await secretLlama
-              .generateCompletion(prompt)
-              .match( /template>(.*?)<.template>/s )
-              [1] ))
+            await generateCompletion(prompt)
+              .match(/===(.*)===/s)
+            [1]))
       } catch (error) {
         setRetryCount(retryCount + 1)
       }
@@ -34,10 +33,10 @@ const CharacterStage = ({ setCharacter }) => {
   const [input, setInput] = useState('')
 
   return <div>
-    <p>
+    <p> // TODO: JSON defines prompt and template for each stage, so it can be reused between UI and `useLanguage`.
       Create a character for a comedy game show.
     </p>
- 
+
     <input>
       value={input}
       onChange={e => setInput(e.target.value)}
@@ -92,7 +91,7 @@ const StrategyStage = ({ character, challenge, setStrategy }) => {
 
 
 // TODO: state machine from SceneStage -> CritiqueStage.
-                      // TODO: `strategy` as a property of `character`
+// TODO: `strategy` as a property of `character`
 const SceneStage = ({ character, challenge, strategy, setScene }) => {
   const scene = useLanguage(`
     Write a script for the following characters attempts at the challenge based on their provided strategies:
@@ -189,8 +188,8 @@ const Multiplex = ({ prompt, characters, setter }) => {
 
 
 const App = () => {
-  const [character, setCharacter] = useState([ /* {characterName, description} */ ])
-  const [challenge, setChallenge] = useState([ /* {challengeName, description} */ ])
+  const [character, setCharacter] = useState([ /* {characterName, description} */])
+  const [challenge, setChallenge] = useState([ /* {challengeName, description} */])
   const [scenes, setScenes] = {
     /* [challengeName]: {[characterName]: {strategyDescription, sceneText, sceneCritique}} */
   }
