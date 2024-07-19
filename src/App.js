@@ -1,3 +1,5 @@
+/* Preposterous Gauntlet, a comedy game show roleplaying game. */
+
 import React, { useState, useEffect } from 'react'
 
 import { generateCompletion } from 'web-llm'
@@ -32,8 +34,9 @@ const useLanguage = prompt => {
 const CharacterStage = ({ setCharacter }) => {
   const [input, setInput] = useState('')
 
+  // TODO: JSON defines prompt and template for each stage, so it can be reused between UI and `useLanguage`.  `({prompt: fn, template: fn})` **
   return <div>
-    <p> // TODO: JSON defines prompt and template for each stage, so it can be reused between UI and `useLanguage`.
+    <p>
       Create a character for a comedy game show.
     </p>
 
@@ -122,7 +125,7 @@ const SceneStage = ({ character, challenge, strategy, setScene }) => {
   `)
 
   setScene(scene)
-  return <p>{scene}</p>
+  return <div><p>{scene}</p></div>
 }
 
 
@@ -156,13 +159,13 @@ const CritiqueStage = ({ character, challenge, scene, setCritique }) => {
   `)
 
   setCritique(critique)
-  return <p>{critique}</p>
+  return <div><p>{critique}</p></div>
 }
 
 
-// Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`. *
+// ** Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`.
 const Multiplex = ({ prompt, characters, setter }) => {
-  // * TODO, considering the example of scene generation:
+  // ** TODO, considering the example of scene generation:
   //  `const Multiplex = ({ prompt /* e.g. scene prompt */, characters, setter /* e.g. scenes */ }) => {`.
   //
   //  for each character, when generating a scene, we consider the character's strategy in special first-person terms.
@@ -172,6 +175,7 @@ const Multiplex = ({ prompt, characters, setter }) => {
   // for(const mainCharacter of characters) {
   //   for(const otherCharacters of characters) {
   //     if(mainCharacter === otherCharacters) continue
+  //     // TODO: no, actually-actually completed means stitching the template and the prompt together for the machine.  PROMPT COMBINATOR.
   //     const completedPrompt = prompt({ mainCharacter, otherCharacters })
   //   }
   // }

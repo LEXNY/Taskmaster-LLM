@@ -1,69 +1,53 @@
-
-body {
-  font-family: 'Bangers', cursive;
-  background-color: #1a1a2e;
-  color: #e94560;
-  margin: 0;
-  padding: 0;
-}
+/* Preposterous Gauntlet, a comedy game show roleplaying game. */
 
 h1 {
+  font-family: 'Bangers', cursive;
   text-align: center;
   font-size: 2.5em;
-  color: #f0f3bd;
   text-shadow: 3px 3px #e94560;
-  margin-bottom: 20px;
 }
 
-.card {
-  background-color: #16213e;
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
+body {
+  background-color: #f7f7f7;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 2px solid #e94560;
-  background-color: #0f3460;
-  color: #f0f3bd;
-  border-radius: 5px;
-  font-size: 1em;
+div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
-input:focus {
-  outline: none;
-  border-color: #f0f3bd;
+p {
+  font-size: 1.5em;
+  text-align: center;
 }
 
 button {
   background-color: #e94560;
-  color: #f0f3bd;
+  color: white;
   border: none;
+  border-radius: 5px;
   padding: 10px 20px;
   font-size: 1em;
-  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #f0f3bd;
-  color: #e94560;
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-button:focus {
-  outline: none;
+  background-color: #ff6f8d;
 }
 
 button:disabled {
-  background-color: #0f3460;
-  color: #16213e;
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+input {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
