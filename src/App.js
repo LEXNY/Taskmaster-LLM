@@ -1,5 +1,7 @@
 /* Preposterous Gauntlet, a comedy game show roleplaying game. */
 
+// TODO: TypeScript everything.
+
 import React, { useState, useEffect } from 'react'
 
 import { generateCompletion } from 'web-llm'
