@@ -2,7 +2,7 @@ import React from 'react'
           // TODO: Note that you need to prompt the model to answer in JSON
 
 // TODO: state machine from CritiqueStage -> CharacterStage.
-export default ({ character, challenge, scene, setCritique }) => {
+export default ({ scene, setScene, setStage, useLanguage }) => {
     const critique = useLanguage(`
       You are the capricious judge of a comedy game show challenge:
       ===

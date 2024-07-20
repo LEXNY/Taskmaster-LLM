@@ -3,8 +3,13 @@ import * as language from '@mlc-ai/web-llm'
 
 import CharacterStage from './stages/CharacterStage'
 
-const App = async () => {
-  const engine = await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC")
+const App = () => {
+  const [engine, setEngine] = useState(undefined)
+  useEffect(() => {
+    (async () => {
+      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
+    })()
+  })
   const useLanguage
     = (prompt) => {
       const [response, setResponse] = useState('')
@@ -32,7 +37,7 @@ const App = async () => {
       return response
     }
 
-  const [scene, setScene] = useState({ description: 'TODO', characters: {} })
+  const [scene, setScene] = useState({ description: '', characters: {} })
   const [CurrentStage, setStage] = useState(() => CharacterStage)
 
   return <article>
@@ -41,6 +46,7 @@ const App = async () => {
       scene={scene}
       setScene={setScene}
       setStage={setStage}
+      useLanguage={useLanguage}
     />
   </article>
 }

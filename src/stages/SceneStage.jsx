@@ -20,7 +20,7 @@ import React from 'react'
 
 // TODO: state machine from SceneStage -> CritiqueStage.
 // TODO: `strategy` as a property of `character`
-export default ({ character, challenge, strategy, setScene }) => {
+export default ({ scene, setScene, setStage, useLanguage }) => {
     const scene = useLanguage(`
       Write a script for the following characters attempts at the challenge based on their provided strategies:
       ===

@@ -2,7 +2,8 @@ import React, { useState } from 'react'
           // TODO: Note that you need to prompt the model to answer in JSON
 
 // TODO: state machine from StrategyStage -> SceneStage
-export default ({ character, challenge, setStrategy }) => {
+export default ({ scene, setScene, setStage, useLanguage }) => {
+  /* TODO
     const [input, setInput] = useState('')
   
     return <div>
@@ -19,4 +20,6 @@ export default ({ character, challenge, setStrategy }) => {
       />
       <button onClick={() => setStrategy(input)}>Submit</button>
     </div>
-  }
+ */
+return <div><p>{'strategy'}</p></div>
+}

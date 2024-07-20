@@ -1,12 +1,18 @@
-import React from 'react'
-          // TODO: Note that you need to prompt the model to answer in JSON
+import React, { useState, useEffect } from 'react'
 
-// TODO: state machine from ChallengeStage -> StrategyStage
-export default ({ scene, setScene, setStage, useLanguage }) => {
-    const challenge = useLanguage(`
-      Create a challenge for a comedy game show with the character:
+import StrategyStage from './StrategyStage'
+
+export default ({ scene: {characters}, setScene, setStage, useLanguage }) => {
+  const [description, setDescription] = useState('...loading...')
+
+  // TODO: Note that you need to prompt the model to answer in JSON
+  useEffect(() =>{
+    (async () => {
+    setDescription(await
+  useLanguage(`
+      Create a challenge for a comedy game show with the characters:
       ===
-      ${character}
+      ${JSON.stringify(characters)}
       ===
   
       ===
@@ -16,8 +22,13 @@ export default ({ scene, setScene, setStage, useLanguage }) => {
   
       [Rules or Requirements]
       ===
-    `)
-  
-    setChallenge(challenge)
-    return <p>{challenge}</p>
-  }
+    `))
+
+    setScene({description, characters})
+  })()
+  })
+
+  return <div><p>{'description'}</p>
+  <button onClick={() => setStage(() => StrategyStage)}>Submit</button>
+  </div>
+}
