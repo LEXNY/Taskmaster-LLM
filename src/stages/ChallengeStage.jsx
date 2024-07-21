@@ -2,14 +2,10 @@ import React, { useState, useEffect } from 'react'
 
 import StrategyStage from './StrategyStage'
 
-export default ({ scene: {characters}, setScene, setStage, useLanguage }) => {
-  const [description, setDescription] = useState('...loading...')
-
+export default ({ scene: {characters}, setScene, setStage, query, response }) => {
   // TODO: Note that you need to prompt the model to answer in JSON
   useEffect(() =>{
-    setDescription(
-      /* TODO
-  useLanguage(`
+  query(`
       Create a challenge for a comedy game show with the characters:
       ===
       ${JSON.stringify(characters)}
@@ -23,13 +19,12 @@ export default ({ scene: {characters}, setScene, setStage, useLanguage }) => {
       [Rules or Requirements]
       ===
     `)
-    */
-    )
 
+    const {description} = response // TODO
     setScene({description, characters})
-  }, [description, characters])
+  }, [characters])
 
-  return <div><p>{'description'}</p>
+  return <div><p>{response.description}</p>
   <button onClick={() => setStage(() => StrategyStage)}>Submit</button>
   </div>
 }
