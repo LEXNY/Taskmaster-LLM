@@ -5,9 +5,9 @@ import ChallengeStage from './ChallengeStage'
 export default ({ scene, setScene, setStage, useLanguage }) => {
     const [input, setInput] = useState('')
 
-    const setCharacter = (input) => {
+    const setCharacter = () => {
       const [name, description] = input.split(':') // TODO: JSON
-      setScene({...scene, characters: { ...scene.characters, [name]: description }})
+      setScene({...scene, characters: {...scene.characters, [name]: description}})
       setStage(() => ChallengeStage)
     }
   
@@ -23,6 +23,6 @@ return <div>
         onChange={e => setInput(e.target.value)}
         placeholder="[Character Name]:  [Character Description]."
       />
-      <button onClick={() => setCharacter(input)}>Submit</button>
+      <button onClick={() => setCharacter()}>Submit</button>
     </div>
   }

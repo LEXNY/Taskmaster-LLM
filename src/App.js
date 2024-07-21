@@ -4,7 +4,8 @@ import * as language from '@mlc-ai/web-llm'
 import CharacterStage from './stages/CharacterStage'
 
 const chatCompletion = () => 'hi' // TODO
-const engie = {chatCompletion} // TODO
+const getMessage = () => 'hi' // TODO
+const engie = {chatCompletion, getMessage} // TODO
 
 const useLanguage
 = (prompt, engine) => {
@@ -52,7 +53,7 @@ const App = () => {
       scene={scene}
       setScene={setScene}
       setStage={setStage}
-      useLanguage={useLanguage}
+      useLanguage={useLanguage /* TODO: import, not prop*/}
     />
   </article>
 }

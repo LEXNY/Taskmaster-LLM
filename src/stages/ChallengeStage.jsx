@@ -8,6 +8,7 @@ export default ({ scene: {characters}, setScene, setStage, useLanguage }) => {
   // TODO: Note that you need to prompt the model to answer in JSON
   useEffect(() =>{
     setDescription(
+      /* TODO
   useLanguage(`
       Create a challenge for a comedy game show with the characters:
       ===
@@ -21,10 +22,12 @@ export default ({ scene: {characters}, setScene, setStage, useLanguage }) => {
   
       [Rules or Requirements]
       ===
-    `))
+    `)
+    */
+    )
 
     setScene({description, characters})
-  })
+  }, [description, characters])
 
   return <div><p>{'description'}</p>
   <button onClick={() => setStage(() => StrategyStage)}>Submit</button>
