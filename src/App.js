@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import * as language from '@mlc-ai/web-llm'
-
 import CharacterStage from './stages/CharacterStage'
 
+
 const useLanguage = (engine) => {
-    const [response, setResponse] = useState('')
+  const [response, setResponse] = useState('')
 
-    if(!engine) return { query: () => {}, response }
-
-    const query = async (content) => {
-      try {
-        await engine.chatCompletion({
-          response_format: { type: "json_object" }, stream: false,
-          messages: [{ role: "user", content }],
-        })
-        const message = await engine.getMessage()
-        setResponse( /* TODO: JSON.parse( */ message /* ) */ )
-      } catch ({message}) { setResponse(message) }
-    }
-
-    return { query, response }
+  const query = async content => {
+    try {
+      await engine.chatCompletion({
+        response_format: { type: "json_object" }, stream: false,
+        messages: [{ role: "user", content }],
+      })
+      const message = await engine.getMessage()
+      setResponse( /* TODO: JSON.parse( */ message /* ) */)
+    } catch ({ message }) { setResponse(message) }
   }
 
-export default ()=>{
+  return { response, query }
+}
+
+
+export default () => {
   // Wrap setStage values in extra functions.  Google "useState component lazy init".
   const [CurrentStage, setStage] = useState(() => () => "Downloading acerbic wit...")
   const [scene, setScene] = useState({ description: '', characters: {} })
@@ -31,16 +30,18 @@ export default ()=>{
   const { query, response } = useLanguage(engine)
 
   useEffect(() => {
-    (async ()=>{  // TODO: using tiny models for testing
+    (async () => {  // TODO: using tiny models for testing
       setEngine(await language.CreateMLCEngine("SmolLM-135M-Instruct-q4f32_1-MLC"))
     })()
   })
-  useEffect(()=>{ if(engine) setStage(()=> CharacterStage) }, [engine])
+  useEffect(() => { if (engine) setStage(() => CharacterStage) }, [engine])
 
   return <article>
     <h1>Preposterous Gauntlet</h1>
     <CurrentStage
-      scene={scene} setScene={setScene} setStage={setStage} query={query} response={response}
+      scene={scene} setScene={setScene}
+      setStage={setStage}
+      query={query} response={response}
     />
   </article>
 }
