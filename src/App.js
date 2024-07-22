@@ -16,7 +16,7 @@ const useLanguage = (engine) => {
         })
         const message = await engine.getMessage()
         setResponse( /* TODO: JSON.parse( */ message /* ) */ )
-      } catch (e) { setResponse(`ERROR: ${e}`) }
+      } catch ({message}) { setResponse(message) }
     }
 
     return { query, response }
