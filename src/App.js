@@ -16,14 +16,21 @@ const useLanguage = (engine) => {
               content: prompt,
             },
           ],
-          response_format: { type: "json_object" },
+          // TODO: poor compat with tiny models.
+          // using tiny models for testing for now.
+          // response_format: { type: "json_object" },
         }
         await engine.chatCompletion(request)
+        const message = await engine.getMessage()
+        console.log("MESSAGE: ", message) // TODO
         setResponse(
-          JSON.parse(
-            await engine.getMessage()
-          ))
+          message // TODO
+          //JSON.parse( // TODO
+          //await engine.getMessage()
+          //)
+        )
       } catch (description) {
+        console.log("ERROR: ", description)
         setResponse(description)
       }
     }
