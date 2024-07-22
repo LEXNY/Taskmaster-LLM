@@ -3,48 +3,43 @@ import * as language from '@mlc-ai/web-llm'
 
 import CharacterStage from './stages/CharacterStage'
 
-const chatCompletion = () => 'hi' // TODO
-const getMessage = () => 'hi' // TODO
-const engie = {chatCompletion, getMessage} // TODO
+const useLanguage = (engine) => {
+    const [response, setResponse] = useState('')
 
-const useLanguage
-= (engine) => {
-  const [response, setResponse] = useState('')
-
-  const query = async (prompt) => {
-    const request = {
-      stream: false, n: 1, max_tokens: 128,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      response_format: { type: "json_object" },
+    const query = async (prompt) => {
+      try {
+        const request = {
+          stream: false, n: 1, max_tokens: 128,
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          response_format: { type: "json_object" },
+        }
+        await engine.chatCompletion(request)
+        setResponse(
+          JSON.parse(
+            await engine.getMessage()
+          ))
+      } catch (description) {
+        setResponse(description)
+      }
     }
-    await engine.chatCompletion(request)
-    // TODO: temporary error shim
-    try { JSON.parse(engine.getMessage()) }
-    catch { engine.getMessage = () => '{"description": "error"}' }
-    setResponse(
-      JSON.parse(
-        await engine.getMessage()
-      ))
-  }
 
-  return {query, response}
-}
+    return { query, response }
+  }
 
 const App = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
-    setEngine(engie) // TODO
-    return // TODO
     (async () => {
-      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
+      // TODO: setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
+      setEngine(await language.CreateMLCEngine("SmolLM-135M-Instruct-q4f32_1-MLC"))
     })()
   })
-  const {query, response} = useLanguage(engine)
+  const { query, response } = useLanguage(engine)
 
   const [scene, setScene] = useState({ description: '', characters: {} })
   const [CurrentStage, setStage] = useState(() => CharacterStage)
@@ -59,7 +54,7 @@ const App = () => {
       response={response}
     />
   </article> :
-  <p>Loading...</p>
+    <p>Loading... TODO progress percentage</p>
 }
 
 export default App
