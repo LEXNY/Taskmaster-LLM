@@ -6,19 +6,14 @@ import CharacterStage from './stages/CharacterStage'
 const useLanguage = (engine) => {
     const [response, setResponse] = useState('')
 
-    const query = async (prompt) => {
+    if(!engine) return { query: () => {}, response }
+
+    const query = async (content) => {
       try {
         const request = {
           stream: false, n: 1, max_tokens: 128,
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          // TODO: poor compat with tiny models.
-          // using tiny models for testing for now.
-          // response_format: { type: "json_object" },
+          messages: [{ role: "user", content }],
+          response_format: { type: "json_object" },
         }
         await engine.chatCompletion(request)
         const message = await engine.getMessage()
@@ -29,39 +24,35 @@ const useLanguage = (engine) => {
           //await engine.getMessage()
           //)
         )
-      } catch (description) {
-        console.log("ERROR: ", description)
-        setResponse(description)
-      }
+      } catch (e) { setResponse(`ERROR: ${e}`) }
     }
 
     return { query, response }
   }
 
 const App = () => {
+  // component values must be wrapped because of lazy initialization.
+  const [CurrentStage, setStage] = useState(() => () => "Downloading acerbic wit...")
+  const [scene, setScene] = useState({ description: '', characters: {} })
+
   const [engine, setEngine] = useState(undefined)
+  const { query, response } = useLanguage(engine)
+
   useEffect(() => {
-    (async () => {
-      // TODO: setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
+    (async ()=>{  // TODO: using tiny models for testing
       setEngine(await language.CreateMLCEngine("SmolLM-135M-Instruct-q4f32_1-MLC"))
     })()
   })
-  const { query, response } = useLanguage(engine)
+  useEffect(() => {
+    if(engine) setStage(() => CharacterStage)
+  }, [engine])
 
-  const [scene, setScene] = useState({ description: '', characters: {} })
-  const [CurrentStage, setStage] = useState(() => CharacterStage)
-
-  return engine ? <article>
-    <h1>Preposterous Gauntlet</h1>
-    <CurrentStage
-      scene={scene}
-      setScene={setScene}
-      setStage={setStage}
-      query={query}
-      response={response}
-    />
-  </article> :
-    <p>Loading... TODO progress percentage</p>
+  return <article>
+      <h1>Preposterous Gauntlet</h1>
+      <CurrentStage
+        scene={scene} setScene={setScene} setStage={setStage} query={query} response={response}
+      />
+    </article>
 }
 
 export default App
