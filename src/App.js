@@ -3,6 +3,7 @@ import * as language from '@mlc-ai/web-llm'
 import CharacterStage from './stages/CharacterStage'
 
 
+// TODO: automatic schematic merging
 const useLanguage = (engine) => {
   const [response, setResponse] = useState('')
 
@@ -14,10 +15,29 @@ const useLanguage = (engine) => {
       })
       const message = await engine.getMessage()
       setResponse( /* TODO: JSON.parse( */ message /* ) */)
-    } catch ({ message }) { setResponse(message) }
+    } catch ({ message }) { setResponse(message + ' ---- ' + response) }
   }
 
   return { response, query }
+}
+
+export const useSchematic = schematic => {
+  const inputs = {}
+  const returns = {inputs}
+
+  for(const key in schematic) {
+    const [value, setValue] = useState('')
+    const input = <TextField
+      value={value}
+      placeholder={schematic[key]}
+      onChange={e => setValue(e.target.value)}
+      sx={{TODO: 'TODO'}}
+    />
+    inputs[key] = input
+    returns[key] = value
+  }
+
+  return returns
 }
 
 

@@ -1,0 +1,84 @@
+import { renderToNodeStream } from "react-dom/server"
+
+const background = '#2a2a2a'
+const container = '#444'
+const accent = '#ffcc00'
+
+const boxShadow = '2px 2px 0px 0px rgba(255, 0, 0, 0.9)'
+const textShadow = '1px 1px 0px rgba(255, 0, 0, 0.9)'
+
+export const stage = {
+  borderRadius: 0,
+  backgroundColor: container,
+  padding: 4,
+  maxWidth: 600,
+  margin: '40px auto',
+  boxShadow,
+};
+
+export const headingStyles = {
+  fontFamily: 'Bangers, Arial, sans-serif',
+  color: accentColor,
+  textShadow,
+};
+
+export const inputStyles = {
+  borderRadius: 0,
+  width: '100%',
+  marginBottom: 4,
+  backgroundColor: background,
+  boxShadow,
+};
+
+export const buttonStyles = {
+  borderRadius: 0,
+  backgroundColor: accent,
+  boxShadow,
+};
+
+export const body = {
+  backgroundColor: background,
+  color: '#ffffff',
+  fontFamily: 'Arial, sans-serif',
+};
+
+
+
+const theme = createTheme({
+  TODO
+})
+
+const App = () => {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={body}>
+        <Character />
+      </Box>
+    </ThemeProvider>
+  );
+};
+
+
+
+/* CHARACTER EXAMPLE */
+    <Box sx={stageStyles}>
+      <Typography variant="h4">
+        Character Creation
+      </Typography>
+      <Typography variant="body1">
+        Create a character for a comedy game show.
+      </Typography>
+      <TextField
+        fullWidth
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="[Character Name]: [Character Description]"
+        sx={inputStyles}
+      />
+      <Button 
+        onClick={setCharacter}
+      >
+        Submit
+      </Button>
+    </Box>
