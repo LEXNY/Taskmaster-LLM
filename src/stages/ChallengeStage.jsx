@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 
 import StrategyStage from './StrategyStage'
 
-export default ({ scene: { characters }, setScene, setStage, query, response }) => {
+export default ({ characters, setScene, query, response }) => {
   useEffect(() => {
     query(`
       Create a challenge for a comedy game show with the characters:
@@ -17,13 +17,10 @@ export default ({ scene: { characters }, setScene, setStage, query, response }) 
     setScene({ description, characters })
   }, [characters])
 
-  // TODO: temporarily serializing
-  const todo = JSON.stringify(response)
-
   return <div>
-    <p>{todo}</p>
+    <p>{response}</p>
     <button
-      onClick={() => setStage(() => StrategyStage)}>
+      onClick={() => setScene(StrategyStage)}>
       Submit
     </button>
   </div>

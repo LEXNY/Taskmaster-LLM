@@ -1,74 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import * as language from '@mlc-ai/web-llm'
 import CharacterStage from './stages/CharacterStage'
-
-
-export const useSchematic = schematic => {
-  const inputs = {}
-  const returns = {inputs}
-
-  for(const key in schematic) {
-    // `schematic` is static per component, so this does not violate hook rules.
-    const [value, setValue] = useState('')
-    const input = <TextField
-      value={value}
-      placeholder={schematic[key]}
-      onChange={e => setValue(e.target.value)}
-      sx={{TODO: 'TODO'}}
-    />
-    inputs[key] = input
-    returns[key] = value
-  }
-}
-
-
-
-
-
-    // TODO: schematic parameter
-const useLanguage = () => {
-  const [response, setResponse] = useState('')
-  const [engine, setEngine] = useState(undefined)
-  useEffect(() => {
-    (async () => {
-      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
-    })()
-  })
-
-  const query = async (content) => {
-    while(true) {
-    try {
-      await engine.chatCompletion({
-        response_format: { type: "json_object" }, stream: false,
-        messages: [{ role: "user", content }],
-      })
-      const message = await engine.getMessage()
-      console.log("MESSAGE: ", message)
-      const response = JSON.parse(message)
-      setResponse(newResponse)
-      return
-    } catch (_) {}
-  }
-
-  return { ready: engine !== undefined, query, response }
-}}
+import { useLanguage } from './hooks/useLanguage'
 
 
 export default () => {
-  // Wrap setStage values in extra functions.  Google "useState component lazy init".
-  const [CurrentStage, setStage] = useState(() => () => "Downloading acerbic wit...")
-  const [scene, setScene] = useState({ description: '', characters: {} })
+  // `useState` calls functions given as arguments.
+  // This is a pattern for lazy loading but throws when putting a component inside.
+  const [Scene, lazySetScene] = useState(() => () => "Downloading acerbic wit...")
+  const setScene = (scene) => lazySetScene(() => scene)
 
-  const { ready, query, response } = useLanguage(engine)
-  useEffect(() => { if (ready) setStage(() => CharacterStage) }, [ready])
+  const [characters, setCharacters] = useState({})
 
+  const { ready, query, response } = useLanguage()
+  useEffect(() => { if (ready) setScene(CharacterStage) }, [ready])
+
+    console.log(JSON.stringify(Scene.name))
   return <article>
-    <h1
-      onClick={setStage(() => CharacterStage)}
-    >Preposterous Gauntlet</h1>
-    <CurrentStage
-      scene={scene} setScene={setScene}
-      setStage={setStage}
+    <h1>Preposterous Gauntlet</h1>
+    <Scene
+      characters={characters} setCharacters={setCharacters}
+      setScene={setScene}
       query={query} response={response}
     />
   </article>
