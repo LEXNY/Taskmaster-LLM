@@ -26,7 +26,7 @@ const machinePrompt = `
   ${JSON.stringify(schematic)}
 `
 
-export default ({ setScene, characters, setCharacters, query, response }) => {
+export default ({ setScene, characters, setCharacters }) => {
   const { name, description, inputs } = useSchematic(schematic)
 
   return <div>

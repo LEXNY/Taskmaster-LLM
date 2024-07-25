@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import TextField from '@mui/material/TextField'
 
 
 export const useSchematic = schematic => {
@@ -10,7 +9,11 @@ export const useSchematic = schematic => {
     // `schematic` is static per component, so this does not violate hook rules.
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, setValue] = useState('')
-    const input = <TextField
+    // TODO: this is created anew each render.  Halts keyboard input after each press.
+    // Memory leak like crazy... related?
+    // Also, tangential, but check why CharacterStage rerenders every ~10sec.
+    const input = <input
+      name={key}
       value={value}
       placeholder={schematic[key]}
       onChange={e => setValue(e.target.value)}
