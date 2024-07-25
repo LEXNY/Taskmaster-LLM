@@ -4,46 +4,41 @@ import * as language from '@mlc-ai/web-llm'
 import CharacterStage from './stages/CharacterStage'
 
 const useLanguage = (engine) => {
-    const [response, setResponse] = useState('')
+  const [response, setResponse] = useState('')
 
-    const query = async (prompt) => {
-      try {
-        const request = {
-          stream: false, n: 1, max_tokens: 128,
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          // TODO: poor compat with tiny models.
-          // using tiny models for testing for now.
-          // response_format: { type: "json_object" },
-        }
-        await engine.chatCompletion(request)
-        const message = await engine.getMessage()
-        console.log("MESSAGE: ", message) // TODO
-        setResponse(
-          message // TODO
-          //JSON.parse( // TODO
-          //await engine.getMessage()
-          //)
-        )
-      } catch (description) {
-        console.log("ERROR: ", description)
-        setResponse(description)
+  const query = async (prompt) => {
+    while(true) {
+    try {
+      const request = {
+        stream: false, n: 1,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        response_format: { type: "json_object" },
       }
+      await engine.chatCompletion(request)
+      const message = await engine.getMessage()
+      console.log("MESSAGE: ", message)
+      setResponse(JSON.parse(message))
+      break
+    } catch (description) {
+      console.log("ERROR: ", description)
+      setResponse(description)
     }
-
-    return { query, response }
   }
+  }
+
+  return { query, response }
+}
 
 const App = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
     (async () => {
-      // TODO: setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
-      setEngine(await language.CreateMLCEngine("SmolLM-135M-Instruct-q4f32_1-MLC"))
+      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
     })()
   })
   const { query, response } = useLanguage(engine)
