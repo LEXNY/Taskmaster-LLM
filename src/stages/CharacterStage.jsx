@@ -26,14 +26,15 @@ const machinePrompt = `
   ${JSON.stringify(schematic)}
 `
 
-export default ({ setScene, characters, setCharacters }) => {
+const CharacterStage = ({ setScene, characters, setCharacters }) => {
   const {name, description} = useSchematic(schematic)
+  console.log(useSchematic(schematic)) // TODO
 
   return <div>
     <p>{prompt}</p>
 
-    <input {...name} />
-    <input {...description} />
+    <input key="name" {...name} />
+    <input key="description" {...description} />
     <button onClick={() => {
       setCharacters({ ...characters, [name.value]: description.value })
       setScene(ChallengeStage)
@@ -41,7 +42,7 @@ export default ({ setScene, characters, setCharacters }) => {
   </div>
 }
 
-
+export default CharacterStage
 
 
 /* CHARACTER EXAMPLE
