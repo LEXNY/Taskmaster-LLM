@@ -28,7 +28,6 @@ const machinePrompt = `
 
 const CharacterStage = ({ setScene, characters, setCharacters }) => {
   const {name, description} = useSchematic(schematic)
-  console.log(useSchematic(schematic)) // TODO
 
   return <div>
     <p>{prompt}</p>
@@ -45,7 +44,7 @@ const CharacterStage = ({ setScene, characters, setCharacters }) => {
 export default CharacterStage
 
 
-/* CHARACTER EXAMPLE
+/* TODO: CHARACTER EXAMPLE
     <Box sx={stageStyles}>
       <Typography variant="h4">
         Character Creation

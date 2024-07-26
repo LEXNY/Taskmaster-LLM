@@ -20,7 +20,8 @@ import React from 'react'
 
 // TODO: state machine from SceneStage -> CritiqueStage.
 // TODO: `strategy` as a property of `character`
-export default ({ scene, setScene, setStage, useLanguage }) => {
+export default ({ setScene, setStage, useLanguage }) => {
+  /* TODO
     const scene = useLanguage(`
       Write a script for the following characters attempts at the challenge based on their provided strategies:
       ===
@@ -48,7 +49,7 @@ export default ({ scene, setScene, setStage, useLanguage }) => {
       [ ... ]
       ===
     `)
-  
-    setScene(scene)
-    return <div><p>{scene}</p></div>
+    */
+
+    return <div><p>TODO</p></div>
   }

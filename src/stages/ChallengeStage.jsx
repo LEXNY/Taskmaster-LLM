@@ -2,8 +2,10 @@ import React, { useEffect } from 'react'
 
 import StrategyStage from './StrategyStage'
 
-export default ({ characters, setScene, query, response }) => {
+export default ({ characters, setCharacters, setScene, query, response }) => {
   useEffect(() => {
+    if(characters.length < 5) {return}
+
     query(`
       Create a challenge for a comedy game show with the characters:
       ===
@@ -14,7 +16,7 @@ export default ({ characters, setScene, query, response }) => {
     `)
 
     const { description } = response // TODO
-    setScene({ description, characters })
+    setCharacters(characters)
   }, [characters])
 
   return <div>

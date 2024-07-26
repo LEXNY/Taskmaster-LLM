@@ -102,6 +102,7 @@ export const App = () => {
   const setScene = (scene) => lazySetScene(() => scene)
 
   const [characters, setCharacters] = useState({})
+  const [challenge, setChallenge] = useState('')
 
   const { ready, query, response } = useLanguage()
   useEffect(() => { if (ready) setScene(CharacterStage) }, [ready])
@@ -109,9 +110,12 @@ export const App = () => {
   return <article>
     <h1>Preposterous Gauntlet</h1>
     <Scene
-      characters={characters} setCharacters={setCharacters}
+      // framework
       setScene={setScene}
       query={query} response={response}
+      // game
+      characters={characters} setCharacters={setCharacters}
+      challenge={challenge} setChallenge={setChallenge}
     />
   </article>
 }
