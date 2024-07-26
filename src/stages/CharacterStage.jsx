@@ -42,27 +42,3 @@ const CharacterStage = ({ setScene, characters, setCharacters }) => {
 }
 
 export default CharacterStage
-
-
-/* TODO: CHARACTER EXAMPLE
-    <Box sx={stageStyles}>
-      <Typography variant="h4">
-        Character Creation
-      </Typography>
-      <Typography variant="body1">
-        Create a character for Preposterous Gauntlet (TODO load definitions of things like "Propesterous Gauntlet is a comedy game show" in system prompt).
-      </Typography>
-      <TextField
-        fullWidth
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="[Character Name]: [Character Description]"
-        sx={inputStyles}
-      />
-      <Button 
-        onClick={setCharacter}
-      >
-        Submit
-      </Button>
-    </Box>
-*/

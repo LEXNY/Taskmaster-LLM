@@ -96,8 +96,6 @@ const theme = createTheme({
 
 
 export const App = () => {
-  // `useState` calls functions given as arguments.
-  // This is a pattern for lazy loading but throws when putting a component inside.
   const [Scene, lazySetScene] = useState(() => () => "Downloading acerbic wit...")
   const setScene = (scene) => lazySetScene(() => scene)
 

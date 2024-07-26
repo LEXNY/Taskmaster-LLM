@@ -6,26 +6,24 @@ export const useLanguage = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
     (async () => {
-      // TODO setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
+      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
     })()
-    setEngine('TODO')
   })
 
   const query = async (content) => {
-    setResponse(content); return 'TODO' // TODO
-
     while (true) {
+      console.log('retrying...')
       try {
         await engine.chatCompletion({
-          response_format: { type: "json_object" }, stream: false,
+          stream: false, n:1, max_tokens: 500,
           messages: [{ role: "user", content }],
         })
         const message = await engine.getMessage()
-        console.log("MESSAGE: ", message)
-        const response = JSON.parse(message)
-        setResponse(response)
+        setResponse(message)
         break
-      } catch (_) { }
+      } catch (e) {
+        console.log("LLM: retrying...", e)
+      }
     }
   }
 

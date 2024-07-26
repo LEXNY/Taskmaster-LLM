@@ -9,6 +9,7 @@ export const useSchematic = schematic => {
     const [value, setValue] = useState(placeholder)
 
     inputs[name] = {
+      name,
       value,
       placeholder,
       onChange: e => setValue(e.target.value),
