@@ -6,11 +6,14 @@ export const useLanguage = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
     (async () => {
-      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
+      // TODO setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
     })()
+    setEngine('TODO')
   })
 
   const query = async (content) => {
+    setResponse(content); return 'TODO' // TODO
+
     while (true) {
       try {
         await engine.chatCompletion({
@@ -24,7 +27,7 @@ export const useLanguage = () => {
         break
       } catch (_) { }
     }
-
   }
+
   return { ready: engine !== undefined, query, response }
 }

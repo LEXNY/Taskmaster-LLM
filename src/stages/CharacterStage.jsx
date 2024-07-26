@@ -27,16 +27,42 @@ const machinePrompt = `
 `
 
 export default ({ setScene, characters, setCharacters }) => {
-  const { name, description, inputs } = useSchematic(schematic)
+  const {name, description} = useSchematic(schematic)
 
   return <div>
     <p>{prompt}</p>
 
-    <inputs.name />
-    <inputs.description />
+    <input {...name} />
+    <input {...description} />
     <button onClick={() => {
-      setCharacters({ ...characters, [name]: description })
+      setCharacters({ ...characters, [name.value]: description.value })
       setScene(ChallengeStage)
     }}>Create Character</button>
   </div>
 }
+
+
+
+
+/* CHARACTER EXAMPLE
+    <Box sx={stageStyles}>
+      <Typography variant="h4">
+        Character Creation
+      </Typography>
+      <Typography variant="body1">
+        Create a character for Preposterous Gauntlet (TODO load definitions of things like "Propesterous Gauntlet is a comedy game show" in system prompt).
+      </Typography>
+      <TextField
+        fullWidth
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="[Character Name]: [Character Description]"
+        sx={inputStyles}
+      />
+      <Button 
+        onClick={setCharacter}
+      >
+        Submit
+      </Button>
+    </Box>
+*/

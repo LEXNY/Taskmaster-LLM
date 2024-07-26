@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client'
 import CharacterStage from './stages/CharacterStage'
 import { useLanguage } from './hooks/useLanguage'
 
