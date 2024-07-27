@@ -6,18 +6,18 @@ export const useLanguage = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
     (async () => {
-      setEngine(await language.CreateMLCEngine("Llama-3-8B-Instruct-q4f32_1-MLC"))
+      setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
     })()
   })
 
   const query = async (content) => {
     while (true) {
-      console.log('retrying...')
       try {
         await engine.chatCompletion({
-          stream: false, n:1, max_tokens: 500,
+          stream: false,
           messages: [{ role: "user", content }],
         })
+        // TODO: split response into lines and render each a <p>
         const message = await engine.getMessage()
         setResponse(message)
         break

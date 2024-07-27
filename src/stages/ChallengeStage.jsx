@@ -12,12 +12,9 @@ export default ({ characters, setChallenge, setScene, query, response }) => {
       ${JSON.stringify(characters)}
       ===
 
-      Include only the name and description of the challenge in your response, like:
-      ===
-      { "name": "The Great Banana Peel-Off", "description": "Competitors must peel and eat as many bananas as possible in 60 seconds." }
-      ===
+      Include only the text of the challenge, without any salutations or other text.
     `)
-  })
+  }, [1])
 
   return <div>
     <p>{response}</p>
