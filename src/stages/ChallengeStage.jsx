@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react'
-
 import StrategyStage from './StrategyStage'
 
-// TODO: useSchematic
 
 export default ({ characters, setChallenge, setScene, query, response }) => {
   useEffect(() => {
@@ -17,7 +15,7 @@ export default ({ characters, setChallenge, setScene, query, response }) => {
   }, [1])
 
   return <div>
-    <p>{response}</p>
+    {response.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
     <button
       key="submit"
       onClick={() => {
@@ -25,7 +23,7 @@ export default ({ characters, setChallenge, setScene, query, response }) => {
         setScene(StrategyStage)
       }}
     >
-      Submit
+      I accept
     </button>
   </div>
 }

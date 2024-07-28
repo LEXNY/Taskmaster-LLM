@@ -16,18 +16,9 @@ const schematic = {
   description: '[Character Description]',
 }
 
-const machinePrompt = `
-  ${prompt}
-
-  Return a JSON object, using the keys from this example verbatim, but using the values as
-  descriptions of *what* to fill in in place.
-
-  ===
-  ${JSON.stringify(schematic)}
-`
-
-const CharacterStage = ({ setScene, characters, setCharacters }) => {
+const CharacterStage = ({ setScene, characters, setCharacters, query, response }) => {
   const {name, description} = useSchematic(schematic)
+  // TODO: other characters made by LLM
 
   return <div>
     <p>{prompt}</p>

@@ -1,10 +1,6 @@
 import React from 'react'
-          // TODO: Note that you need to prompt the model to answer in JSON
 
-
-// ** Some stages (e.g. CharacterStage) are rendered once to UI and 4 times to `useLanguage`.
-    // ** TODO, considering the example of scene generation:
-    //
+    // TODO:
     //  for each character, when generating a scene, we consider the character's strategy in special first-person terms.
     //  it is highlighted in a separate segment of the prompt, whereas we also consider each other character's strategy.
     //  For all prompts, we consider the same set of all 5 character's strategies, but the prompt is generated 5 times.
@@ -16,8 +12,6 @@ import React from 'react'
     //     const completedPrompt = prompt({ mainCharacter, otherCharacters })
     //   }
     // }
-
-
 // TODO: state machine from SceneStage -> CritiqueStage.
 // TODO: `strategy` as a property of `character`
 export default ({ setScene, setStage, useLanguage }) => {

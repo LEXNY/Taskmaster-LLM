@@ -14,17 +14,15 @@ export const App = () => {
   const { ready, query, response } = useLanguage()
   useEffect(() => { if (ready) setScene(CharacterStage) }, [ready])
 
-  return <article>
-    <h1>Preposterous Gauntlet</h1>
-    <Scene
-      // framework
-      setScene={setScene}
-      query={query} response={response}
-      // game
-      characters={characters} setCharacters={setCharacters}
-      challenge={challenge} setChallenge={setChallenge}
-    />
-  </article>
+  return <Scene
+    // framework
+    setScene={setScene}
+    query={query} response={response}
+    
+    // game
+    characters={characters} setCharacters={setCharacters}
+    challenge={challenge} setChallenge={setChallenge}
+  />
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
