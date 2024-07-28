@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 import SceneStage from './SceneStage'
 import { useSchematic } from '../hooks/useSchematic'
+import { deepSetCharacter } from './CharacterStage'
 
 
 const schematic = {
   input: '[Strategy Name]:  [Tactics or Actions].',
 }
 
-export default ({ setScene, response, setStrategy }) => {
+export default ({ characters, setScene, response }) => {
+  const userCharacter = Object.entries(characters)[0]
   const {strategy} = useSchematic(schematic)
   // TODO: multiplex
 
@@ -18,7 +20,8 @@ export default ({ setScene, response, setStrategy }) => {
     {response.map((r, i) => <p key={i}>{r}</p>)}
     <input key="strategy" {...strategy} />
     <button onClick={() => {
-      setStrategy(strategy.value)
+      // TODO: multiplexing has to happen in the onClick also.
+      deepSetCharacter(characters, setCharacters, userCharacter.name, { strategy: strategy.value })
       setScene(SceneStage)
     }}>Submit</button>
   </div>

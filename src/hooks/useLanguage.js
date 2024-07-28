@@ -20,6 +20,7 @@ export const useLanguage = () => {
           stream: false,
           messages: [
             { role: "system", content: system },
+            // TODO: shot-prompting
             { role: "user", content }
           ],
         })
@@ -30,6 +31,8 @@ export const useLanguage = () => {
         console.log("LLM: retrying...", e)
       }
     }
+
+    // TODO: return response
   }
 
   return { ready: engine !== undefined, query, response }

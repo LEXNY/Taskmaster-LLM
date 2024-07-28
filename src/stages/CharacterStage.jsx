@@ -16,9 +16,18 @@ const schematic = {
   description: '[Character Description]',
 }
 
+export const deepSetCharacter = (characters, setCharacters, name, datum) => {
+  setCharacters({
+    ...characters, [name]: {
+      ...characters[name], ...datum
+    }
+  })
+}
+
 const CharacterStage = ({ setScene, characters, setCharacters, query, response }) => {
-  const {name, description} = useSchematic(schematic)
+  const { name, description } = useSchematic(schematic)
   // TODO: other characters made by LLM
+  // TODO: function for settingcharacter
 
   return <div>
     <p>{prompt}</p>
@@ -26,7 +35,7 @@ const CharacterStage = ({ setScene, characters, setCharacters, query, response }
     <input key="name" {...name} />
     <input key="description" {...description} />
     <button onClick={() => {
-      setCharacters({ ...characters, [name.value]: description.value })
+      deepSetCharacter(characters, setCharacters, name, { description })
       setScene(ChallengeStage)
     }}>Create Character</button>
   </div>
