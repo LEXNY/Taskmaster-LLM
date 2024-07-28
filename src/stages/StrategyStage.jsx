@@ -8,7 +8,7 @@ const schematic = {
   input: '[Strategy Name]:  [Tactics or Actions].',
 }
 
-export default ({ characters, setScene, response }) => {
+export default ({ characters, setCharacters, setScene, response }) => {
   const userCharacter = Object.entries(characters)[0]
   const {strategy} = useSchematic(schematic)
   // TODO: multiplex

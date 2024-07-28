@@ -3,6 +3,7 @@ import React from 'react'
 
 // TODO: state machine from CritiqueStage -> CharacterStage.
 export default ({ scene, setScene, setStage, useLanguage }) => {
+  /* TODO
     const critique = useLanguage(`
       You are the capricious judge of a comedy game show challenge:
       ===
@@ -32,4 +33,6 @@ export default ({ scene, setScene, setStage, useLanguage }) => {
   
     setCritique(critique)
     return <div><p>{critique}</p></div>
+    */
+     return '' // TODO
   }

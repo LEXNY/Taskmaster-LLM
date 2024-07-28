@@ -16,7 +16,7 @@ import CritiqueStage from './CritiqueStage'
 
 // TODO: this one do as interactive, line-by-line.
 // The system prompt and few shotting are there to help set personalities.
-export default ({ challenge, characters, setScene, setScript, query }) => {
+export default ({ challenge, characters, setScene, setScript, response, query }) => {
   /* TODO
     const script = query(`
       Write a script for the following character's attempt at the challenge based on their provided strategies:
@@ -70,10 +70,9 @@ export default ({ challenge, characters, setScene, setScript, query }) => {
 
   return <div>
     {response.map((r, i) => <p key={i}>{r}</p>)}
-    < button onClick={() => {
+    <button onClick={() => {
       setScene(CritiqueStage)
-      setScript(script)
-    }
-    }>Roast me</button>
+      setScript(response)
+    }}>Roast me</button>
   </div >
 }
