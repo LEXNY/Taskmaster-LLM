@@ -1,5 +1,9 @@
 import { useState } from 'react'
 
+// Prompts sometimes have to go to both the LLM and user.
+// Schematics define the common return structure for both the user and LLM.
+// The hints are textual descriptions of what should go in the keys.
+// `useSchematic` defines the state hooks and input components for each key.
 export const useSchematic = schematic => {
   const inputs = {}
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import * as language from '@mlc-ai/web-llm'
 
 
+// `useLanguage` is used to query the LLM and get responses.
 export const useLanguage = () => {
   const [response, setResponse] = useState([])
   const [engine, setEngine] = useState(undefined)
