@@ -8,9 +8,10 @@ export const useLanguage = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
     (async () => {
+      console.log('yorpolo')
       setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
     })()
-  })
+  }, [1])
 
   const query = async (content) => {
     const system = "You generate content for a comedy game show application."
@@ -29,11 +30,9 @@ export const useLanguage = () => {
         setResponse(message.split("\n"))
         break
       } catch (e) {
-        console.log("LLM: retrying...", e)
+        console.error(e)
       }
     }
-
-    // TODO: return response
   }
 
   return { ready: engine !== undefined, query, response }
