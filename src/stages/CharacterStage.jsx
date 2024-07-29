@@ -30,19 +30,12 @@ const CharacterStage = ({ setScene, characters, setCharacters, query, response }
     const bound = characters[name.value] ? 5 : 4
     if (
       Object.keys(characters).length <= bound
-    ) { query(prompt) }
-
-    // TODO: request JSON in query based on schematic.
-    // TODO: parsing response
-    // TODO: an array of paragraphs isnt useful in all cases.
-    const _name = response[0]
-    const description = name
-    // TODO: actually capture the response
-    // TODO: pass in schematic and enforce JSON output.
-    deepSetCharacter(characters, setCharacters, _name, { description })
+      // pass in schematic and enforce JSON output.
+    ) { query(prompt, schematic) }
 
     try {
       const { name, description } = JSON.parse(response)
+      deepSetCharacter(characters, setCharacters, name, { description })
     } catch {/* TODO set retry? */}
   }, [response])
 

@@ -13,18 +13,20 @@ export const useLanguage = () => {
     })()
   }, [1])
 
-  const query = async (content) => {
-    console.log(content)//TODO
-    const system = "You generate content for a comedy game show application."
+  const query = async (content, schematic) => {
+    const system = "You generate JSON-formatted content for a comedy game show application."
+
+    const prompt = content + "Respond only with JSON, using these keys:\n```" +
+      JSON.stringify(schematic, null, 2) + "```"
     
     while (true) {
       try {
         await engine.chatCompletion({
-          stream: false,
+          stream: false, response_format: { type: "json_object" },
           messages: [
             { role: "system", content: system },
             // TODO: shot-prompting
-            { role: "user", content }
+            { role: "user", prompt }
           ],
         })
         const message = await engine.getMessage()
