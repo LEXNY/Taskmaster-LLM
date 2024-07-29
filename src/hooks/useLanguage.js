@@ -8,12 +8,13 @@ export const useLanguage = () => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
     (async () => {
-      console.log('yorpolo')
+      // TODO: hypothesis:  every first generation is garbage.
       setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
     })()
   }, [1])
 
   const query = async (content) => {
+    console.log(content)//TODO
     const system = "You generate content for a comedy game show application."
     
     while (true) {
@@ -27,6 +28,9 @@ export const useLanguage = () => {
           ],
         })
         const message = await engine.getMessage()
+        // TODO: maybe pass in a callback to handle the response.
+        // the setResponse flow through the entire App is getting
+        // unwieldy, especially with multiplexing.
         setResponse(message.split("\n"))
         break
       } catch (e) {

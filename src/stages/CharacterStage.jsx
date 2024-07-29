@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, { useEffect } from 'react'
 import ChallengeStage from './ChallengeStage'
 import { useSchematic } from '../hooks/useSchematic'
 
@@ -26,11 +26,11 @@ export const deepSetCharacter = (characters, setCharacters, name, datum) => {
 const useMultiplex = (schematic) => {
   const user = useSchematic(schematic)
   const bots = []
-  for(let i = 0; i < 4; i++) {
+  for (let i = 0; i < 4; i++) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     bots.push(useSchematic(schematic))
   }
-  return {user, bots}
+  return { user, bots }
 }
 
 const CharacterStage = ({ setScene, characters, setCharacters, query, response }) => {
@@ -42,25 +42,32 @@ const CharacterStage = ({ setScene, characters, setCharacters, query, response }
   // call `query` for each, getting a `response` for each.
   // set the characters in `setCharacters` for each.
   useEffect(() => {
-    for(let i = 0; i < 4; i++) {
-        const name = `AI ${i}`
-        console.log('foo is happening') // TODO
-        const description = query(`
-          Create a character for a comedy game show.
-        `)
-        deepSetCharacter(characters, setCharacters, name, { description })
+    for (let i = 0; i < 4; i++) {
+      // TODO: parsing response
+      // TODO: an array of paragraphs isnt useful.
+      const name = `AI ${i}`
+      // TODO: actually capture the response
+      // TODO: pass in schematic and enforce JSON output.
+      const description = query(prompt)
+      deepSetCharacter(characters, setCharacters, name, { description })
     }
-  }, [1])
+  }, [response])
+
+  // TODO: only allow continuing once all characters are created.
 
   return <div>
     <p>{prompt}</p>
 
     <input key="name" {...name} />
     <input key="description" {...description} />
-    <button onClick={() => {
-      deepSetCharacter(characters, setCharacters, name, { description })
-      setScene(ChallengeStage)
-    }}>Create Character</button>
+    {Object.keys(characters).length === 5 ?
+      <button onClick={() => {
+        deepSetCharacter(characters, setCharacters, name, { description })
+        setScene(ChallengeStage)
+      }}>Create Character</button>
+      :
+      <p>Generating AI characters...</p>
+    }
   </div>
 }
 
