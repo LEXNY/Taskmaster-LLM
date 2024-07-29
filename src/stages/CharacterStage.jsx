@@ -20,40 +20,31 @@ export const deepSetCharacter = (characters, setCharacters, name, datum) => {
   })
 }
 
-// TODO: pseudocode for a multiplexing helper.
-// multiplex = ()=> 4.times{useSchematic}
-// [user, ...bots] = mutliplex
-const useMultiplex = (schematic) => {
-  const user = useSchematic(schematic)
-  const bots = []
-  for (let i = 0; i < 4; i++) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    bots.push(useSchematic(schematic))
-  }
-  return { user, bots }
-}
-
 const CharacterStage = ({ setScene, characters, setCharacters, query, response }) => {
-  // TODO: this is just singleplexing for the user atm
+  // inputs for the user character
   const { name, description } = useSchematic(schematic)
-
-  // TODO: starting to add in machines.
-  // Loop 4 times, creating AI controlled characters.
-  // call `query` for each, getting a `response` for each.
-  // set the characters in `setCharacters` for each.
+  // machine-generated machine-controlled characters
   useEffect(() => {
-    for (let i = 0; i < 4; i++) {
-      // TODO: parsing response
-      // TODO: an array of paragraphs isnt useful.
-      const name = `AI ${i}`
-      // TODO: actually capture the response
-      // TODO: pass in schematic and enforce JSON output.
-      const description = query(prompt)
-      deepSetCharacter(characters, setCharacters, name, { description })
-    }
-  }, [response])
+    // TODO: race condition against user input, hacky fix.
+    // Better would be putting them in different places.
+    const bound = characters[name.value] ? 5 : 4
+    if (
+      Object.keys(characters).length <= bound
+    ) { query(prompt) }
 
-  // TODO: only allow continuing once all characters are created.
+    // TODO: request JSON in query based on schematic.
+    // TODO: parsing response
+    // TODO: an array of paragraphs isnt useful in all cases.
+    const _name = response[0]
+    const description = name
+    // TODO: actually capture the response
+    // TODO: pass in schematic and enforce JSON output.
+    deepSetCharacter(characters, setCharacters, _name, { description })
+
+    try {
+      const { name, description } = JSON.parse(response)
+    } catch {/* TODO set retry? */}
+  }, [response])
 
   return <div>
     <p>{prompt}</p>
@@ -68,6 +59,7 @@ const CharacterStage = ({ setScene, characters, setCharacters, query, response }
       :
       <p>Generating AI characters...</p>
     }
+    {JSON.stringify(characters)}
   </div>
 }
 

@@ -28,10 +28,7 @@ export const useLanguage = () => {
           ],
         })
         const message = await engine.getMessage()
-        // TODO: maybe pass in a callback to handle the response.
-        // the setResponse flow through the entire App is getting
-        // unwieldy, especially with multiplexing.
-        setResponse(message.split("\n"))
+        setResponse(message)
         break
       } catch (e) {
         console.error(e)

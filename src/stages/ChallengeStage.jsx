@@ -15,7 +15,7 @@ export default ({ characters, setChallenge, setScene, query, response }) => {
   }, [1])
 
   return <div>
-    {response.map((paragraph, i) =>
+    {response.split("\n").map((paragraph, i) =>
       <p key={i}>{paragraph}</p>)
     }
     {response.length ?
