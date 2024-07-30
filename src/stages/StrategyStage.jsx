@@ -23,14 +23,10 @@ const schematic = {
 
 export default ({ gameState, setGameState, query, setScene }) => {
   const { strategy } = useSchematic(schematic)
-  const [numBots] = 
 
   useEffect(() => {
-    // TODO: not preventing resetting strategy on same char.
-    const needsStrategy = Object.entries(gameState.antagonists)
-      .find((_, a) => !a.strategy)
-    if (needsStrategy) {
-      const [name, antagonist] = needsStrategy
+    for(const [name, antagonist] of Object.entries(antagonists)) {
+      if(antagonist.strategy) { next }
       query(
         prompt(antagonist, gameState.challenge),
         schematic,
@@ -38,12 +34,12 @@ export default ({ gameState, setGameState, query, setScene }) => {
           draft.antagonists[name].strategy = strategy
         }
       )
+      break
     }
   })
 
   return <div>
-    <p>{prompt(gameState.protagonist)}</p>
-    {gameState.challenge.split("\n").map((r, i) => <p key={i}>{r}</p>)}
+    <p>{prompt(gameState.protagonist, gameState.challenge)}</p>
     <input key="strategy" {...strategy} />
     <button onClick={() => {
       setGameState(draft => {
