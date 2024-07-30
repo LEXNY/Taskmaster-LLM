@@ -4,9 +4,10 @@ import ReactDOM from 'react-dom/client'
 import CharacterStage from './stages/CharacterStage'
 import { useLanguage } from './hooks/useLanguage'
 
+const NullScene = () => "Downloading acerbic wit..."
 
 export const App = () => {
-  const [Scene, lazySetScene] = useState(() => () => "Downloading acerbic wit...")
+  const [Scene, lazySetScene] = useState(() => NullScene)
   const setScene = (scene) => lazySetScene(() => scene)
 
   const [gameState, setGameState] = useImmer({
@@ -16,7 +17,7 @@ export const App = () => {
   })
 
   const query = useLanguage(setGameState)
-  useEffect(() => { if (query) setScene(CharacterStage) }, [query])
+  useEffect(() => { if (query && Scene === NullScene) setScene(CharacterStage) }, [query])
 
   return <Scene
     // framework

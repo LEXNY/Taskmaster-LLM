@@ -2,34 +2,35 @@ import React, { useEffect } from 'react'
 import StrategyStage from './StrategyStage'
 
 
-export default ({ characters, setChallenge, setScene, query, response }) => {
+const schematic = {
+  name: '[Challenge Name]',
+  description: '[Challenge Description]',
+}
+
+export default ({ setScene, gameState: {protagonist, antagonists, challenge}, query }) => {
   useEffect(() => {
     query(`
-      Create a challenge for a comedy game show with the characters:
+      Create a challenge for a comedy game show for these characters:
       ===
-      ${JSON.stringify(characters)}
+      ${JSON.stringify(protagonist)}
+      ${JSON.stringify(antagonists)}
       ===
-
-      Include only the text of the challenge, without any salutations or other text.
-    `)
+    `, schematic,
+      ({description}) => draft => { draft.challenge = description }
+    )
   }, [1])
 
-  return <div>
-    {response.split("\n").map((paragraph, i) =>
-      <p key={i}>{paragraph}</p>)
-    }
-    {response.length ?
+  return challenge.length ? <div>
+      {challenge.split("\n").map((paragraph, i) =>
+        <p key={i}>{paragraph}</p>)}
       <button
         key="submit"
         onClick={() => {
-          setChallenge(response)
           setScene(StrategyStage)
         }}
       >
         I accept
-      </button>
+      </button></div>
     :
       <p>Generating challenge...</p>
-    }
-  </div>
 }

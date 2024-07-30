@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import * as language from '@mlc-ai/web-llm'
 
 
+// TODO: debounce because multiple requests interleave.
 export const useLanguage = (setter) => {
   const [engine, setEngine] = useState(undefined)
   useEffect(() => {
@@ -27,19 +28,12 @@ export const useLanguage = (setter) => {
           })
           const message = await engine.getMessage()
 
-          // TODO: check for generated primary key already existing.
-
-          // TODO: callback is the API-consumer-provided plan.
+          // callback is the API-consumer-provided plan.
           // setter is the `useImmer` setter.
           // JSON.parse(message) is the generated content.
-          //
-          // example use of `query`:
-          // query(prompt, schematic,
-          //   parsedResponse => draft => draft.characters[parsedResponse.name] = parsedResponse
-          // )
-          //
-          console.log(message)
-          setter(callback(JSON.parse(message)))
+          console.log(`generated: ${message}`)
+          const parsedResponse = JSON.parse(message)
+          setter(callback(parsedResponse))
           break
         } catch (e) {
           console.error(e)

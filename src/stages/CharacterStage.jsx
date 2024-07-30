@@ -35,13 +35,13 @@ const CharacterStage = ({ setScene, gameState: {antagonists}, setGameState, quer
     <input key="description" {...description} />
     {ready ?
       <button onClick={() => {
-        setGameState(draft => { draft.protagonist = { name, description } })
+        setGameState(draft => { draft.protagonist = { name: name.value, description: description.value } })
         setScene(ChallengeStage)
       }}>Create Character</button>
       :
       <p>Generating AI characters...</p>
     }
-    {Object.entries(antagonists).map(([name, { description }], i) => <p>
+    {Object.entries(antagonists).map(([name, { description }], i) => <p key={name}>
       {name}: {description}
     </p>)}
   </div>
