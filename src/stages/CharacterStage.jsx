@@ -12,32 +12,20 @@ const schematic = {
   description: '[Character Description]',
 }
 
-export const deepSetCharacter = (characters, setCharacters, name, datum) => {
-  setCharacters({
-    ...characters, [name]: {
-      ...characters[name], ...datum
-    }
-  })
-}
 
-const CharacterStage = ({ setScene, characters, setCharacters, query, response }) => {
+const CharacterStage = ({ setScene, characters, setCharacters, query }) => {
+  const create = ({name, description}) => {
+    setCharacters({ ...characters, [name]: { name, description } })
+  }
+
   // inputs for the user character
   const { name, description } = useSchematic(schematic)
   // machine-generated machine-controlled characters
   useEffect(() => {
-    // TODO: race condition against user input, hacky fix.
-    // Better would be putting them in different places.
-    const bound = characters[name.value] ? 5 : 4
-    if (
-      Object.keys(characters).length <= bound
-      // pass in schematic and enforce JSON output.
-    ) { query(prompt, schematic) }
-
-    try {
-      const { name, description } = JSON.parse(response)
-      deepSetCharacter(characters, setCharacters, name, { description })
-    } catch {/* TODO set retry? */}
-  }, [response])
+    for(let i = 0; i < 4; i++) {
+      query(prompt, schematic, create)
+    }
+  }, [1])
 
   return <div>
     <p>{prompt}</p>
@@ -46,7 +34,7 @@ const CharacterStage = ({ setScene, characters, setCharacters, query, response }
     <input key="description" {...description} />
     {Object.keys(characters).length === 5 ?
       <button onClick={() => {
-        deepSetCharacter(characters, setCharacters, name, { description })
+        create({name, description})
         setScene(ChallengeStage)
       }}>Create Character</button>
       :
