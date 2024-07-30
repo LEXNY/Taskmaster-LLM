@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from 'react'
+import { useImmer } from 'use-immer'
 import ReactDOM from 'react-dom/client'
 import CharacterStage from './stages/CharacterStage'
-import { query } from './hooks/useLanguage'
-import * as language from '@mlc-ai/web-llm'
+import { useLanguage } from './hooks/useLanguage'
 
 
 export const App = () => {
-  const [engine, setEngine] = useState(undefined)
-  useEffect(() => {
-    (async () => {
-      setEngine(await language.CreateMLCEngine("Phi-3-mini-4k-instruct-q4f16_1-MLC"))
-    })()
-  }, [1])
-
   const [Scene, lazySetScene] = useState(() => () => "Downloading acerbic wit...")
   const setScene = (scene) => lazySetScene(() => scene)
 
-  useEffect(() => { if (engine) setScene(CharacterStage) }, [engine])
+  const [gameState, setGameState] = useImmer({
+    protagonist: '',
+    antagonists: {},
+    challenge: '',
+  })
 
-  const [characters, setCharacters] = useState({})
+  const query = useLanguage(setGameState)
+  useEffect(() => { if (query) setScene(CharacterStage) }, [query])
 
   return <Scene
     // framework
-    setScene={setScene}
-    query={(q, schematic, callback) => query(q, schematic, callback, engine)}
+    setScene={setScene} query={query}
     // game
-    characters={characters} setCharacters={setCharacters}
+    gameState={gameState} setGameState={setGameState}
   />
 }
 

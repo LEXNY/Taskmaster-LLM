@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import ChallengeStage from './ChallengeStage'
 import { useSchematic } from '../hooks/useSchematic'
 
@@ -13,34 +13,37 @@ const schematic = {
 }
 
 
-const CharacterStage = ({ setScene, characters, setCharacters, query }) => {
-  const create = ({name, description}) => {
-    setCharacters({ ...characters, [name]: { name, description } })
-  }
-
-  // inputs for the user character
+const CharacterStage = ({ setScene, gameState: {antagonists}, setGameState, query }) => {
   const { name, description } = useSchematic(schematic)
+
   // machine-generated machine-controlled characters
   useEffect(() => {
-    for(let i = 0; i < 4; i++) {
-      query(prompt, schematic, create)
+    if (Object.keys(antagonists).length < 4) {
+      query(
+        prompt, schematic,
+        ({ name, description }) => draft => { draft.antagonists[name] = { name, description } }
+      )
     }
-  }, [1])
+  }, [query])
+
+  const ready = Object.keys(antagonists).length === 4 && name.value && description.value
 
   return <div>
     <p>{prompt}</p>
 
     <input key="name" {...name} />
     <input key="description" {...description} />
-    {Object.keys(characters).length === 5 ?
+    {ready ?
       <button onClick={() => {
-        create({name, description})
+        setGameState(draft => { draft.protagonist = { name, description } })
         setScene(ChallengeStage)
       }}>Create Character</button>
       :
       <p>Generating AI characters...</p>
     }
-    {JSON.stringify(characters)}
+    {Object.entries(antagonists).map(([name, { description }], i) => <p>
+      {name}: {description}
+    </p>)}
   </div>
 }
 
