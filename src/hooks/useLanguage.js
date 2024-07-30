@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import * as language from '@mlc-ai/web-llm';
 
 export const useLanguage = (setter) => {
@@ -27,7 +27,7 @@ export const useLanguage = (setter) => {
               { role: "system", content: "You respond only with JSON." },
               { role: "user", content: `repeat ${strungifiedSchematic}` },
               { role: "assistant", content: strungifiedSchematic },
-              { role: "user", content: 'Now use the same property keys, but fill in the values.' + prompt }
+              { role: "user", content: 'Now use those same property keys, but fill in the values according to the following.  ' + prompt }
             ],
           });
 
@@ -38,6 +38,7 @@ export const useLanguage = (setter) => {
           // JSON.parse(message) is the generated content.
           console.log(`generated: ${message}`);
           const parsedResponse = JSON.parse(message);
+          // TODO: additional validation of parsedResponse against schematic?
           setter(callback(parsedResponse));
           setDebounce(false);
           break;

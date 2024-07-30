@@ -14,10 +14,11 @@ export const App = () => {
     protagonist: '',
     antagonists: {},
     challenge: '',
+    script: [],
   })
 
   const query = useLanguage(setGameState)
-  useEffect(() => { if (query && Scene === NullScene) setScene(CharacterStage) }, [query])
+  useEffect(() => { if (query && Scene === NullScene) setScene(CharacterStage) })
 
   return <Scene
     // framework
