@@ -25,8 +25,8 @@ export default ({ gameState, setGameState, query, setScene }) => {
   const { strategy } = useSchematic(schematic)
 
   useEffect(() => {
-    for(const [name, antagonist] of Object.entries(antagonists)) {
-      if(antagonist.strategy) { next }
+    for(const [name, antagonist] of Object.entries(gameState.antagonists)) {
+      if(antagonist.strategy) { continue }
       query(
         prompt(antagonist, gameState.challenge),
         schematic,
@@ -36,7 +36,7 @@ export default ({ gameState, setGameState, query, setScene }) => {
       )
       break
     }
-  })
+  }, [query])
 
   return <div>
     <p>{prompt(gameState.protagonist, gameState.challenge)}</p>
