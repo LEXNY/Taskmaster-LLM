@@ -18,7 +18,7 @@ const prompt = (challenge, character, scene) => `
 `
 
 // TODO: stricter schematic, i.e. don't generate `"score":"[Score between 1-5, preferably < 4]"`.
-// TODO: Search codebase for VALIDATION
+// TODO: Search codebase for VALIDATION.  Perhaps... break each key into a subprompt?
 const schematic = {
   "opening volley": "[Opening volley of insults lambasting the character's performance and general life choices with theatrical disdain.]",
   "grudging acknowledgement": "[Grudging acknowledgement of one positive moment or trait, undermined by a backhanded followup.]",
@@ -31,18 +31,21 @@ const schematic = {
 const CritiqueStage = ({ gameState, query }) => {
   const all = [
     ...Object.entries(gameState.antagonists),
-    [gameState.protagonist.name, gameState.protagonist, true],
+    [gameState.protagonist.name, gameState.protagonist],
   ]
   useEffect(() => {
-    for (const [name, character, isProtagonist] of all) {
+    for (const [name, character] of all) {
       if (character.critique) { continue }
 
       query(
         prompt(gameState.challenge, character, gameState.scene),
         schematic,
-        ({ "opening volley": openingVolley, "grudging acknowledgement": grudgingAcknowledgement, explanation, "parting shot": partingShot, score }) => draft => {
-          const path = isProtagonist ? draft.protagonist : draft.antagonists[name]
-          path.critique = { openingVolley, grudgingAcknowledgement, explanation, partingShot, score }
+        critique => draft => {
+          if(character === gameState.protagonist) {
+            draft.protagonist.critique = critique
+          } else {
+            draft.antagonists[name].critique = critique
+          }
         }
       )
       break
