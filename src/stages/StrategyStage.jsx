@@ -25,8 +25,8 @@ export default ({ gameState, setGameState, query, setScene }) => {
   const { strategy } = useSchematic(schematic)
 
   useEffect(() => {
-    for(const [name, antagonist] of Object.entries(gameState.antagonists)) {
-      if(antagonist.strategy) { continue }
+    for (const [name, antagonist] of Object.entries(gameState.antagonists)) {
+      if (antagonist.strategy) { continue }
       query(
         prompt(antagonist, gameState.challenge),
         schematic,
@@ -39,16 +39,23 @@ export default ({ gameState, setGameState, query, setScene }) => {
   }, [query])
 
   return <div>
+    <h2>Strategy Stage</h2>
     <p>{prompt(gameState.protagonist, gameState.challenge)}</p>
     <input key="strategy" {...strategy} />
-    <button onClick={() => {
-      setGameState(draft => {
-        draft.protagonist.strategy = strategy.value
-      })
-      setScene(SceneStage)
-    }}>Submit</button>
-    {Object.entries(gameState.antagonists).map(([name, { strategy }], i) => <p key={name}>
-      {name}: {JSON.stringify(strategy)}
-    </p>)}
+    <button
+      disabled={!Object.values(gameState.antagonists).every(({ strategy }) => strategy)}
+      onClick={() => {
+        setGameState(draft => {
+          draft.protagonist.strategy = strategy.value
+        })
+        setScene(SceneStage)
+      }}
+    >Submit</button>
+
+    {/* internal state but shown as faded preview */}
+    {Object.entries(gameState.antagonists).map(([name, { strategy }], i) =>
+      <p key={name} className='fade'>
+        {name}: {JSON.stringify(strategy)}
+      </p>)}
   </div>
 }

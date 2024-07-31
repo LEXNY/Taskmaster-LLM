@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client'
 import CharacterStage from './stages/CharacterStage'
 import { useLanguage } from './hooks/useLanguage'
 
+import './index.css'
+
 const NullScene = () => "Downloading acerbic wit..."
 
 export const App = () => {
@@ -14,7 +16,6 @@ export const App = () => {
     protagonist: '',
     antagonists: {},
     challenge: '',
-    script: [],
   })
 
   const query = useLanguage(setGameState)

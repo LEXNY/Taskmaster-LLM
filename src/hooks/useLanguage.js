@@ -22,12 +22,10 @@ export const useLanguage = (setter) => {
           await engine.chatCompletion({
             stream: false,
             response_format: { type: "json_object" },
-            temperature: 0.75,
+            temperature: 0.8,
             messages: [
-              { role: "system", content: "You respond only with JSON." },
-              { role: "user", content: `repeat ${strungifiedSchematic}` },
-              { role: "assistant", content: strungifiedSchematic },
-              { role: "user", content: 'Now use those same property keys, but fill in the values according to the following.  ' + prompt }
+              { role: "system", content: "You respond with JSON matching the schema of this object: \n```" + strungifiedSchematic + "```"},
+              { role: "user", content: prompt }
             ],
           });
 
@@ -38,12 +36,21 @@ export const useLanguage = (setter) => {
           // JSON.parse(message) is the generated content.
           console.log(`generated: ${message}`);
           const parsedResponse = JSON.parse(message);
-          // TODO: additional validation of parsedResponse against schematic?
+
+          // TODO: keep?  Or better idea?  Search codebase for VALIDATION
+          // additional validation of parsedResponse against schematic
+          for(const key in schematic) {
+            if(!(key in parsedResponse)) {
+              console.error(JSON.stringify(parsedResponse), JSON.stringify(schematic));
+              throw new Error(`Key ${key} not found in response`);
+            }
+          }
+
           setter(callback(parsedResponse));
           setDebounce(false);
           break;
         } catch (e) {
-          console.error(e);
+          console.error(e, prompt);
         }
       }
     };

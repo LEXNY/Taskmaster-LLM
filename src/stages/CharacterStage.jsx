@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import ChallengeStage from './ChallengeStage'
 import { useSchematic } from '../hooks/useSchematic'
 
@@ -8,8 +8,8 @@ Create a character for a comedy game show.
 `
 
 const schematic = {
-  name: '[Character Name]',
-  description: '[Character Description]',
+  name: 'Character Name',
+  description: 'Character Description',
 }
 
 
@@ -21,7 +21,7 @@ const CharacterStage = ({ setScene, gameState: {antagonists}, setGameState, quer
     if (Object.keys(antagonists).length < 4) {
       query(
         prompt, schematic,
-        ({ name, description }) => draft => { draft.antagonists[name] = { name, description } }
+        ({ name, description }) => draft => { draft.antagonists[name] = { name, description, script: [] } }
       )
     }
   }, [query])
@@ -29,13 +29,14 @@ const CharacterStage = ({ setScene, gameState: {antagonists}, setGameState, quer
   const ready = Object.keys(antagonists).length === 4 && name.value && description.value
 
   return <div>
+    <h2>Character Stage</h2>
     <p>{prompt}</p>
 
     <input key="name" {...name} />
     <input key="description" {...description} />
     {ready ?
       <button onClick={() => {
-        setGameState(draft => { draft.protagonist = { name: name.value, description: description.value } })
+        setGameState(draft => { draft.protagonist = { name: name.value, description: description.value, script: [] } })
         setScene(ChallengeStage)
       }}>Create Character</button>
       :
