@@ -3,7 +3,6 @@ import * as language from '@mlc-ai/web-llm';
 
 export const useLanguage = (setter) => {
   const [engine, setEngine] = useState(undefined);
-  const [debounce, setDebounce] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -13,8 +12,6 @@ export const useLanguage = (setter) => {
 
   if (engine) {
     return async (prompt, schematic, callback) => {
-      if(debounce) {return}
-      setDebounce(true);
       const strungifiedSchematic = JSON.stringify(schematic);
 
       while (true) {
@@ -38,8 +35,11 @@ export const useLanguage = (setter) => {
           const parsedResponse = JSON.parse(message);
 
           // TODO: keep?  Or better idea?  Search codebase for VALIDATION
-          // additional validation of parsedResponse against schematic
+          // additional validation of parsedResponse against schematic.
+          // TODO: pass in a validation function.
           for(const key in schematic) {
+            // TODO: hack until improving validation of optional keys.
+            if(key === 'does' || key === 'says') { continue }
             if(!(key in parsedResponse)) {
               console.error(JSON.stringify(parsedResponse), JSON.stringify(schematic));
               throw new Error(`Key ${key} not found in response`);
@@ -47,7 +47,6 @@ export const useLanguage = (setter) => {
           }
 
           setter(callback(parsedResponse));
-          setDebounce(false);
           break;
         } catch (e) {
           console.error(e, prompt);

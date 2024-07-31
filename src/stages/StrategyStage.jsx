@@ -18,7 +18,7 @@ const prompt = (character, challenge) => `
 `
 
 const schematic = {
-  strategy: '[Tactics, Doctrine, Goals, Schemes].',
+  strategy: 'Tactics, Doctrine, Goals, Schemes.',
 }
 
 export default ({ gameState, setGameState, query, setScene }) => {
